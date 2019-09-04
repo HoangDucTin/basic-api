@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/HoangDucTin/basic-api/internal/router"
+	"github.com/HoangDucTin/basic-api/router"
 	"context"
 	"net/http"
 	"os"
