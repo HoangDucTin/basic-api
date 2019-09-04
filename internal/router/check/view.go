@@ -1,12 +1,12 @@
 package check
 
 import (
+	"basic-api/internal/mongo"
 	"net/http"
 
 	"github.com/globalsign/mgo/bson"
 	"github.com/go-chi/render"
 
-	"go-api-v2/go-api/internal/mongo"
 )
 
 type viewResponse struct {
