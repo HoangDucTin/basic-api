@@ -1,11 +1,10 @@
 package main
 
 import (
+	"basic-api/internal/logger"
+	"basic-api/internal/mongo"
+	"basic-api/internal/server"
 	"time"
-
-	"go-api-v2/go-api/internal/logger"
-	"go-api-v2/go-api/internal/mongo"
-	"go-api-v2/go-api/internal/server"
 )
 
 func connectMongo() {
