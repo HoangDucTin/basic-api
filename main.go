@@ -1,9 +1,9 @@
 package main
 
 import (
-	"basic-api/internal/logger"
-	"basic-api/internal/mongo"
-	"basic-api/internal/server"
+	"github.com/HoangDucTin/basic-api/internal/logger"
+	"github.com/HoangDucTin/basic-api/internal/mongo"
+	"github.com/HoangDucTin/basic-api/internal/server"
 	"time"
 )
 

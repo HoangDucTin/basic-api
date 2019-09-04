@@ -1,14 +1,14 @@
 package server
 
 import (
-	"basic-api/internal/router"
+	"github.com/HoangDucTin/basic-api/internal/router"
 	"context"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
-	)
+)
 
 func serveWithGracefulShutdown(server *http.Server, timeout time.Duration, proc func() error) error {
 
