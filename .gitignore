@@ -13,3 +13,9 @@
 
 # Ignore the idea
 *.idea/
+
+# Ignore executable file after build
+basic-api
+
+# Ignore Makefile
+Makefile

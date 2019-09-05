@@ -1,6 +1,3 @@
-
-export GOPATH=/home/auttasakl/Project/go
-
 PROJECT=go-api
 
 check: build
