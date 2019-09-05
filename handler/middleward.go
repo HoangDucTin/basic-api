@@ -14,7 +14,7 @@ import (
 )
 
 // This handler set the header to have no cache.
-func setNoCacheHeader(next http.Handler) http.Handler {
+func SetNoCacheHeader(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Cache-Control", "no-cache,no-store,must-revalidate") // HTTP 1.1
 		w.Header().Set("Pragma", "no-cache")                                 // HTTP 1.0
@@ -23,11 +23,7 @@ func setNoCacheHeader(next http.Handler) http.Handler {
 	})
 }
 
-func NewLogMiddleware() func(next http.Handler) http.Handler {
-	return logMiddleware
-}
-
-func logMiddleware(next http.Handler) http.Handler {
+func NewLogMiddleware(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		logFields := logrus.Fields{}
 		start := time.Now()
@@ -72,6 +68,7 @@ func logMiddleware(next http.Handler) http.Handler {
 		logFields["Status"] = loggingRW.status
 		logFields["ProcessTime"] = fmt.Sprintf("%v", time.Since(start))
 		entry := logrus.WithFields(logFields)
+		entry.Logger.SetFormatter(&logrus.JSONFormatter{})
 		entry.Println()
 	}
 	return http.HandlerFunc(fn)

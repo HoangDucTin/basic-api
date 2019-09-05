@@ -12,8 +12,8 @@ func NewRouter() *chi.Mux {
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Recoverer)
 	r.Use(render.SetContentType(render.ContentTypeJSON))
-	r.Use(setNoCacheHeader)
-	r.Use(NewLogMiddleware())
+	r.Use(SetNoCacheHeader)
+	r.Use(NewLogMiddleware)
 
 	r.Route("/", func(r chi.Router) {
 		r.Route("/check", func(r chi.Router) {
