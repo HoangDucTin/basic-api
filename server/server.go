@@ -2,7 +2,7 @@ package server
 
 import (
 	"context"
-	"github.com/HoangDucTin/basic-api/router"
+	"github.com/tinwoan-go/basic-api/router"
 	"net/http"
 	"os"
 	"os/signal"

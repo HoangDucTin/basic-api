@@ -4,15 +4,22 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
+	"encoding/xml"
+	"github.com/tinwoan-go/basic-api/logger"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"time"
 )
 
-var client *http.Client
+var (
+	client          *http.Client
+	contentType     = "Content-Type"
+	jsonContentType = "application/json"
+	xmlContentType  = "text/xml;charset=UTF-8"
+)
 
-func Setup(proxyURL string, timeout time.Duration) error {
+func NewClient(proxyURL string, timeout time.Duration) error {
 	transport := http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
@@ -33,17 +40,20 @@ func Setup(proxyURL string, timeout time.Duration) error {
 	return nil
 }
 
-func Post(url string, request, response interface{}) error {
-	reqJson, err := json.Marshal(request)
+func PostJSON(url, username, password string, request, response interface{}) error {
+	reqJSON, err := json.Marshal(request)
 	if err != nil {
 		return err
 	}
 
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(reqJson))
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(reqJSON))
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set(contentType, jsonContentType)
+	if username != "" && password != "" {
+		req.SetBasicAuth(username, password)
+	}
 
 	res, err := client.Do(req)
 	if err != nil {
@@ -51,7 +61,7 @@ func Post(url string, request, response interface{}) error {
 	}
 	defer func() {
 		if err := res.Body.Close(); err != nil {
-
+			logger.Error("Error when close response body, error: %v", err)
 		}
 	}()
 
@@ -60,15 +70,18 @@ func Post(url string, request, response interface{}) error {
 		return err
 	}
 
-	return json.Unmarshal(data, response)
+	return json.Unmarshal(data, &response)
 }
 
-func Get(url string, request, response interface{}) error {
+func GetJSON(url, username, password string, response interface{}) error {
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set(contentType, jsonContentType)
+	if username != "" && password != "" {
+		req.SetBasicAuth(username, password)
+	}
 
 	res, err := client.Do(req)
 	if err != nil {
@@ -76,11 +89,67 @@ func Get(url string, request, response interface{}) error {
 	}
 	defer func() {
 		if err := res.Body.Close(); err != nil {
-
+			logger.Error("Error when close response body, error: %v", err)
 		}
 	}()
 
-	return json.NewDecoder(res.Body).Decode(response)
+	return json.NewDecoder(res.Body).Decode(&response)
+}
+
+func PostXML(url, username, password string, request, response interface{}) error {
+	reqXML, err := xml.Marshal(request)
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(reqXML))
+	if err != nil {
+		return err
+	}
+	req.Header.Set(contentType, xmlContentType)
+	if username != "" && password != "" {
+		req.SetBasicAuth(username, password)
+	}
+
+	res, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err := res.Body.Close(); err != nil {
+			logger.Error("Error when close response body, error: %v", err)
+		}
+	}()
+
+	data, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return err
+	}
+
+	return xml.Unmarshal(data, &response)
+}
+
+func GetXML(url, username, password string, response interface{}) error {
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Set(contentType, xmlContentType)
+	if username != "" && password != "" {
+		req.SetBasicAuth(username, password)
+	}
+
+	res, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err := res.Body.Close(); err != nil {
+			logger.Error("Error when close response body, error: %v", err)
+		}
+	}()
+
+	return json.NewDecoder(res.Body).Decode(&response)
 }
 
 // End-of-file

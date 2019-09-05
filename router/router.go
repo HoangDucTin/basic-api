@@ -1,7 +1,7 @@
 package router
 
 import (
-	"github.com/HoangDucTin/basic-api/router/check"
+	"github.com/tinwoan-go/basic-api/router/check"
 	"net/http"
 
 	"github.com/go-chi/chi"

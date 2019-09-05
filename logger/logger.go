@@ -35,4 +35,10 @@ func Exit(format string, args ...interface{}) {
 		fmt.Sprintf(format, args...))
 }
 
+func Error(format string, args ...interface{}) {
+	log.Println(
+		"ERROR",
+		fmt.Sprintf(format, args...))
+}
+
 // End-of-file

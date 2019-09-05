@@ -1,3 +1,7 @@
+# github.com/denisenkom/go-mssqldb v0.0.0-20190905012053-7920e8ef8898
+github.com/denisenkom/go-mssqldb
+github.com/denisenkom/go-mssqldb/internal/cp
+github.com/denisenkom/go-mssqldb/internal/querytext
 # github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
 github.com/globalsign/mgo
 github.com/globalsign/mgo/bson
@@ -9,3 +13,15 @@ github.com/go-chi/chi
 github.com/go-chi/chi/middleware
 # github.com/go-chi/render v1.0.1
 github.com/go-chi/render
+# github.com/go-redis/redis v6.15.5+incompatible
+github.com/go-redis/redis
+github.com/go-redis/redis/internal
+github.com/go-redis/redis/internal/consistenthash
+github.com/go-redis/redis/internal/hashtag
+github.com/go-redis/redis/internal/pool
+github.com/go-redis/redis/internal/proto
+github.com/go-redis/redis/internal/util
+# github.com/golang-sql/civil v0.0.0-20190719163853-cb61b32ac6fe
+github.com/golang-sql/civil
+# golang.org/x/crypto v0.0.0-20190325154230-a5d413f7728c
+golang.org/x/crypto/md4
