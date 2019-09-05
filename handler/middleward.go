@@ -23,24 +23,12 @@ func setNoCacheHeader(next http.Handler) http.Handler {
 	})
 }
 
-type structuredLogger struct {
-	Logger *logrus.Logger
+func NewLogMiddleware() func(next http.Handler) http.Handler {
+	return logMiddleware
 }
 
-type structuredLoggerEntry struct {
-	Logger *logrus.Logger
-}
-
-func NewLogMiddleware(logger *logrus.Logger) func(next http.Handler) http.Handler {
-	c := &structuredLogger{
-		Logger: logger,
-	}
-	return c.logMiddleware
-}
-
-func (l *structuredLogger) logMiddleware(next http.Handler) http.Handler {
+func logMiddleware(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		entry := &structuredLoggerEntry{Logger: l.Logger}
 		logFields := logrus.Fields{}
 		start := time.Now()
 		logFields["Start"] = start
@@ -73,9 +61,6 @@ func (l *structuredLogger) logMiddleware(next http.Handler) http.Handler {
 			_ = xml.NewDecoder(rdr1).Decode(&req)
 			logFields["RequestBody"] = req
 		}
-		if strings.HasPrefix(ct, "application/json") {
-
-		}
 		logFields["URI"] = fmt.Sprintf("%s://%s%s", scheme, r.Host, r.RequestURI)
 		loggingRW := &loggingResponseWriter{
 			ResponseWriter: w,
@@ -86,8 +71,8 @@ func (l *structuredLogger) logMiddleware(next http.Handler) http.Handler {
 		logFields["ResponseBody"] = res
 		logFields["Status"] = loggingRW.status
 		logFields["ProcessTime"] = fmt.Sprintf("%v", time.Since(start))
-		entry.Logger = entry.Logger.WithFields(logFields).Logger
-		entry.Logger.Info("")
+		entry := logrus.WithFields(logFields)
+		entry.Println()
 	}
 	return http.HandlerFunc(fn)
 }
