@@ -1,7 +1,7 @@
 package check
 
 import (
-	"github.com/basic-api/mongo"
+	"github.com/HoangDucTin/basic-api/mongo"
 	"net/http"
 
 	"github.com/globalsign/mgo/bson"
