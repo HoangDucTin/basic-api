@@ -23,24 +23,24 @@ func setNoCacheHeader(next http.Handler) http.Handler {
 	})
 }
 
-type StructuredLogger struct {
+type structuredLogger struct {
 	Logger *logrus.Logger
 }
 
-type StructuredLoggerEntry struct {
+type structuredLoggerEntry struct {
 	Logger *logrus.Logger
 }
 
-func newLogMiddleware(logger *logrus.Logger) func(next http.Handler) http.Handler {
-	c := &StructuredLogger{
+func NewLogMiddleware(logger *logrus.Logger) func(next http.Handler) http.Handler {
+	c := &structuredLogger{
 		Logger: logger,
 	}
 	return c.logMiddleware
 }
 
-func (l *StructuredLogger) logMiddleware(next http.Handler) http.Handler {
+func (l *structuredLogger) logMiddleware(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		entry := &StructuredLoggerEntry{Logger: l.Logger}
+		entry := &structuredLoggerEntry{Logger: l.Logger}
 		logFields := logrus.Fields{}
 		start := time.Now()
 		logFields["Start"] = start

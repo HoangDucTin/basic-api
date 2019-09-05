@@ -4,6 +4,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/render"
+	"github.com/sirupsen/logrus"
 	"github.com/tinwoan-go/basic-api/handler/check"
 )
 
@@ -13,6 +14,7 @@ func NewRouter() *chi.Mux {
 	r.Use(middleware.Recoverer)
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 	r.Use(setNoCacheHeader)
+	r.Use(NewLogMiddleware(logrus.New()))
 
 	r.Route("/", func(r chi.Router) {
 		r.Route("/check", func(r chi.Router) {
