@@ -2,7 +2,7 @@ package server
 
 import (
 	"context"
-	"github.com/tinwoan-go/basic-api/handler"
+	"github.com/go-chi/chi"
 	"net/http"
 	"os"
 	"os/signal"
@@ -11,7 +11,6 @@ import (
 )
 
 func serveWithGracefulShutdown(server *http.Server, timeout time.Duration, proc func() error) error {
-
 	// Create listener for the 'SIGTERM'
 	// from kernel
 	trigger := make(chan os.Signal, 1)
@@ -40,10 +39,9 @@ func serveWithGracefulShutdown(server *http.Server, timeout time.Duration, proc 
 	return errShutdown
 }
 
-func ServeHttp(address string, timeout time.Duration) error {
-
+func ServeHTTP(routers *chi.Mux, address string, timeout time.Duration) error {
 	server := &http.Server{
-		Handler: handler.NewRouter(),
+		Handler: routers,
 		Addr:    address,
 	}
 
@@ -52,10 +50,10 @@ func ServeHttp(address string, timeout time.Duration) error {
 	})
 }
 
-func ServeHttps(publicKey, privateKey, address string, timeout time.Duration) error {
+func ServeHTTPS(routers *chi.Mux, publicKey, privateKey, address string, timeout time.Duration) error {
 
 	server := &http.Server{
-		Handler: handler.NewRouter(),
+		Handler: routers,
 		Addr:    address,
 	}
 

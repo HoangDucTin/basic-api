@@ -19,7 +19,7 @@ var (
 	xmlContentType  = "text/xml;charset=UTF-8"
 )
 
-func NewClient(proxyURL string, timeout time.Duration) error {
+func NewHTTPClient(proxyURL string, timeout time.Duration) error {
 	transport := http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}

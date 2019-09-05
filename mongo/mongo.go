@@ -12,7 +12,7 @@ var session *mgo.Session
 
 const InitializedError = "MongoDB connection has not been initialized"
 
-func NewMongo(addresses, database, username, password string, timeout time.Duration) error {
+func NewMongoClient(addresses, database, username, password string, timeout time.Duration) error {
 	dialInfo := mgo.DialInfo{
 		Addrs:    strings.Split(addresses, ","),
 		Database: database,

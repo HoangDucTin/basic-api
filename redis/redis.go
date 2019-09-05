@@ -9,7 +9,7 @@ var (
 	redisClient redis.UniversalClient
 )
 
-func NewRedis(master, password string, addrs []string) {
+func NewRedisClient(master, password string, addrs []string) {
 	redisClient = redis.NewUniversalClient(&redis.UniversalOptions{
 		MasterName: master,
 		Addrs:      addrs,
