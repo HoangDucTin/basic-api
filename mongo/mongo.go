@@ -2,11 +2,10 @@ package mongo
 
 import (
 	"errors"
+	"github.com/globalsign/mgo"
 	"github.com/tinwoan-go/basic-api/logger"
 	"strings"
 	"time"
-
-	"github.com/globalsign/mgo"
 )
 
 var session *mgo.Session

@@ -2,7 +2,7 @@ package server
 
 import (
 	"context"
-	"github.com/tinwoan-go/basic-api/router"
+	"github.com/tinwoan-go/basic-api/handler"
 	"net/http"
 	"os"
 	"os/signal"
@@ -43,7 +43,7 @@ func serveWithGracefulShutdown(server *http.Server, timeout time.Duration, proc 
 func ServeHttp(address string, timeout time.Duration) error {
 
 	server := &http.Server{
-		Handler: router.NewRouter(),
+		Handler: handler.NewRouter(),
 		Addr:    address,
 	}
 
@@ -55,7 +55,7 @@ func ServeHttp(address string, timeout time.Duration) error {
 func ServeHttps(publicKey, privateKey, address string, timeout time.Duration) error {
 
 	server := &http.Server{
-		Handler: router.NewRouter(),
+		Handler: handler.NewRouter(),
 		Addr:    address,
 	}
 
