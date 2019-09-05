@@ -1,4 +1,4 @@
-module basic-api
+module github.com/HoangDucTin/basic-api
 
 go 1.12
 
