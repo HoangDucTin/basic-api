@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	_ "github.com/denisenkom/go-mssqldb"
+	"github.com/tinwoan-go/basic-api/logger"
 	"reflect"
 )
 
@@ -45,6 +46,9 @@ func Find(database, table string, response interface{}, condition map[string]int
 	if condition != nil {
 		selectStatement += fmt.Sprintf(" WHERE 1 = 1")
 		for key, value := range condition {
+			if to := reflect.TypeOf(value); to.Kind() == reflect.String {
+				value = fmt.Sprintf("'%v'", value)
+			}
 			selectStatement += fmt.Sprintf(" AND %v = %v", key, value)
 		}
 	}
@@ -92,9 +96,13 @@ func Find(database, table string, response interface{}, condition map[string]int
 // from given table within given database.
 func FindAll(database, table string, response interface{}, condition map[string]interface{}) error {
 	selectStatement := fmt.Sprintf("USE %v; SELECT * FROM %v", database, table)
+	logger.Warn("condition: %+v", condition)
 	if condition != nil {
 		selectStatement += fmt.Sprintf(" WHERE 1 = 1")
 		for key, value := range condition {
+			if to := reflect.TypeOf(value); to.Kind() == reflect.String {
+				value = fmt.Sprintf("'%v'", value)
+			}
 			selectStatement += fmt.Sprintf(" AND %v = %v", key, value)
 		}
 	}
@@ -146,6 +154,9 @@ func FindWithLimit(database, table string, limit int, response []interface{}, co
 	if condition != nil {
 		selectStatement += fmt.Sprintf(" WHERE 1 = 1")
 		for key, value := range condition {
+			if to := reflect.TypeOf(value); to.Kind() == reflect.String {
+				value = fmt.Sprintf("'%v'", value)
+			}
 			selectStatement += fmt.Sprintf(" AND %v = %v", key, value)
 		}
 	}
@@ -200,11 +211,17 @@ func Update(database, table string, selector map[string]interface{}, updater map
 	}
 	updateStatement := fmt.Sprintf("USE %v; UPDATE %v SET ", database, table)
 	for key, value := range updater {
+		if to := reflect.TypeOf(value); to.Kind() == reflect.String {
+			value = fmt.Sprintf("'%v'", value)
+		}
 		updateStatement += fmt.Sprintf(", %v = %v", key, value)
 	}
 	if selector != nil {
 		updateStatement += " WHERE 1 = 1"
 		for key, value := range selector {
+			if to := reflect.TypeOf(value); to.Kind() == reflect.String {
+				value = fmt.Sprintf("'%v'", value)
+			}
 			updateStatement += fmt.Sprintf(" AND %v = %v", key, value)
 		}
 	}
@@ -224,6 +241,9 @@ func Delete(database, table string, selector map[string]interface{}) error {
 	}
 	deleteStatement := fmt.Sprintf("USE %v; DELETE FROM %v WHERE 1 = 1", database, table)
 	for key, value := range selector {
+		if to := reflect.TypeOf(value); to.Kind() == reflect.String {
+			value = fmt.Sprintf("'%v'", value)
+		}
 		deleteStatement += fmt.Sprintf(" AND %v = %v", key, value)
 	}
 	if _, err := db.Exec(deleteStatement); err != nil {
