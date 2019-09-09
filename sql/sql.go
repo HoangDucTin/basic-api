@@ -251,3 +251,23 @@ func Delete(database, table string, selector map[string]interface{}) error {
 	}
 	return nil
 }
+
+// This function inserts records to
+// the given table and database names.
+func Insert(database, table string, data map[string]interface{}) error {
+	if data == nil {
+		return errors.New("can not insert nil data")
+	}
+	insertStatement := fmt.Sprintf("USE %v; INSERT INTO %v VALUES(",database, table)
+	for _, value := range data {
+		if to := reflect.TypeOf(value); to.Kind() == reflect.String {
+			value = fmt.Sprintf("'%v'", value)
+		}
+		insertStatement += fmt.Sprintf("%v, ", value)
+	}
+	insertStatement = insertStatement[:len(insertStatement) - 2] + ")"
+	if _, err := db.Exec(insertStatement); err != nil {
+		return err
+	}
+	return nil
+}
