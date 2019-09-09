@@ -39,6 +39,8 @@ func serveWithGracefulShutdown(server *http.Server, timeout time.Duration, proc 
 	return errShutdown
 }
 
+// This function serves the server
+// on HTTP protocol.
 func ServeHTTP(routers *chi.Mux, address string, timeout time.Duration) error {
 	server := &http.Server{
 		Handler: routers,
@@ -50,6 +52,8 @@ func ServeHTTP(routers *chi.Mux, address string, timeout time.Duration) error {
 	})
 }
 
+// This function serves the server
+// on HTTPS protocol.
 func ServeHTTPS(routers *chi.Mux, publicKey, privateKey, address string, timeout time.Duration) error {
 
 	server := &http.Server{

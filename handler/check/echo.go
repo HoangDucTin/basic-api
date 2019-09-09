@@ -5,25 +5,18 @@ import (
 	"net/http"
 )
 
-type echoFailed struct {
-	Failure string `json:"failure"`
+type echo struct {
+	Message string `json:"message"`
 }
 
-func Echo(w http.ResponseWriter, r *http.Request) {
-	var request interface{}
-
-	// Responsed with error (if any)
-	err := render.DecodeJSON(r.Body, &request)
-	if err != nil {
-		render.Status(r, http.StatusBadRequest)
-		render.JSON(w, r, echoFailed{
-			Failure: err.Error(),
+// This handler responds a message
+// to notice the user that everything
+// works fine.
+func Echo() http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		render.Status(r, http.StatusOK)
+		render.JSON(w, r, echo{
+			Message: "Welcome to my humble library!",
 		})
-	}
-
-	// Echo back what we got
-	render.Status(r, http.StatusOK)
-	render.JSON(w, r, request)
+	})
 }
-
-// End-of-file

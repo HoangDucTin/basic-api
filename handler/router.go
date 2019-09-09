@@ -7,6 +7,15 @@ import (
 	"github.com/tinwoan-go/basic-api/handler/check"
 )
 
+// This function returns an example
+// handler for your service with
+// an echo function to check.
+// It also provide the applying of
+// some self-built middleware to
+// set no-cache header and print
+// out the request and response of
+// each request in JSON format
+// (suitable for elastic search).
 func NewRouter() *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
@@ -17,9 +26,7 @@ func NewRouter() *chi.Mux {
 
 	r.Route("/", func(r chi.Router) {
 		r.Route("/check", func(r chi.Router) {
-			r.Post("/echo", check.Echo)
-			r.Get("/info", check.Info)
-			r.Get("/view", check.View)
+			r.Get("/echo", check.Echo())
 		})
 	})
 

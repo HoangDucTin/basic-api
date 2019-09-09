@@ -12,6 +12,13 @@ var session *mgo.Session
 
 const InitializedError = "MongoDB connection has not been initialized"
 
+// This function creates an instance
+// of MongoDB session based on given
+// addresses, database name, username
+// and password. The timeout duration
+// for connecting is given.
+// (Notice: You should not set the
+// timeout duration too long.)
 func NewMongoClient(addresses, database, username, password string, timeout time.Duration) error {
 	dialInfo := mgo.DialInfo{
 		Addrs:    strings.Split(addresses, ","),
@@ -31,6 +38,8 @@ func NewMongoClient(addresses, database, username, password string, timeout time
 	}
 }
 
+// This function closes the session
+// to connect with MongoDB.
 func Close() {
 	if session != nil {
 		session.Close()
@@ -47,6 +56,10 @@ func cloneSession() *mgo.Session {
 	return session.Copy()
 }
 
+// This function finds one specific record
+// based on given selector, in side
+// the collection within the database
+// that are given the names.
 func Find(database, collection string, selector, result interface{}) error {
 	s := cloneSession()
 	if s == nil {
@@ -56,6 +69,10 @@ func Find(database, collection string, selector, result interface{}) error {
 	return s.DB(database).C(collection).Find(selector).One(&result)
 }
 
+// This function finds every record
+// based on given selector, in side
+// the collection within the database,
+// which are given the names.
 func FindAll(database, collection string, selector, result interface{}) error {
 	s := cloneSession()
 	if s == nil {
@@ -65,6 +82,10 @@ func FindAll(database, collection string, selector, result interface{}) error {
 	return s.DB(database).C(collection).Find(selector).All(&result)
 }
 
+// This function inserts one record
+// with the given data into the collection
+// within the database, which are given
+// names.
 func Insert(database, collection string, data interface{}) error {
 	s := cloneSession()
 	if s == nil {
@@ -75,6 +96,10 @@ func Insert(database, collection string, data interface{}) error {
 	return s.DB(database).C(collection).Insert(data)
 }
 
+// This function inserts all the records
+// given by the list into the collection
+// within the database, which are given
+// names.
 func InsertAll(database, collection string, list []interface{}) error {
 	s := cloneSession()
 	if s == nil {
@@ -91,6 +116,9 @@ func InsertAll(database, collection string, list []interface{}) error {
 	return err
 }
 
+// This function removes latest record
+// with the given selector from collection
+// in database, which are given names.
 func Remove(database, collection string, selector interface{}) error {
 	s := cloneSession()
 	if s == nil {
@@ -101,6 +129,9 @@ func Remove(database, collection string, selector interface{}) error {
 	return s.DB(database).C(collection).Remove(selector)
 }
 
+// This function removes all the records
+// with the given selector from collection
+// in database, which are given names.
 func RemoveAll(database, collection string, selector interface{}) error {
 	s := cloneSession()
 	if s == nil {
@@ -112,6 +143,10 @@ func RemoveAll(database, collection string, selector interface{}) error {
 	return err
 }
 
+// This function updates latest record
+// selected by selector, with new data
+// is updater, within collection in
+// database, which are given names.
 func Update(database, collection string, selector, updater interface{}) error {
 	s := cloneSession()
 	if s == nil {
@@ -122,6 +157,10 @@ func Update(database, collection string, selector, updater interface{}) error {
 	return s.DB(database).C(collection).Update(selector, updater)
 }
 
+// This function updates all the records
+// selected by selector, with new data
+// is updater, within collection in
+// database, which are given names.
 func UpdateAll(database, collection string, selector, updater interface{}) error {
 	s := cloneSession()
 	if s == nil {
@@ -133,6 +172,12 @@ func UpdateAll(database, collection string, selector, updater interface{}) error
 	return err
 }
 
+// This function updates the latest record
+// selected by the selector, with the given
+// new data, within collection in database,
+// which are given names. This function
+// also returns a new version of the record
+// after update to database.
 func Change(database, collection string, selector, new, result interface{}) error {
 	s := cloneSession()
 	if s == nil {

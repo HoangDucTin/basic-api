@@ -13,7 +13,9 @@ import (
 	"time"
 )
 
-// This handler set the header to have no cache.
+// This middleware will set the header
+// of each and every request to store
+// no cache.
 func SetNoCacheHeader(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Cache-Control", "no-cache,no-store,must-revalidate") // HTTP 1.1
@@ -23,6 +25,10 @@ func SetNoCacheHeader(next http.Handler) http.Handler {
 	})
 }
 
+// This middleware will print out
+// the request and response of each
+// and every request in JSON format
+// (suitable for elastic search).
 func NewLogMiddleware(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		logFields := logrus.Fields{}
