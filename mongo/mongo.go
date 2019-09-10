@@ -46,7 +46,7 @@ func Close() {
 		session = nil
 		return
 	}
-	logger.Warn("Session does not exist or already been closed")
+	logger.Warn("Session does not exist or has already been closed")
 }
 
 func cloneSession() *mgo.Session {

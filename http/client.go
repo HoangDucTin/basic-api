@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"github.com/tinwoan-go/basic-api/logger"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"time"
@@ -77,12 +76,7 @@ func PostJSON(url, username, password string, request, response interface{}) err
 		}
 	}()
 
-	data, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return err
-	}
-
-	return json.Unmarshal(data, &response)
+	return json.NewDecoder(res.Body).Decode(&response)
 }
 
 // This function sends a get request
@@ -147,12 +141,7 @@ func PostXML(url, username, password string, request, response interface{}) erro
 		}
 	}()
 
-	data, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return err
-	}
-
-	return xml.Unmarshal(data, &response)
+	return xml.NewDecoder(res.Body).Decode(&response)
 }
 
 // This function sends a get request
@@ -182,7 +171,7 @@ func GetXML(url, username, password string, response interface{}) error {
 		}
 	}()
 
-	return json.NewDecoder(res.Body).Decode(&response)
+	return xml.NewDecoder(res.Body).Decode(&response)
 }
 
 // End-of-file
