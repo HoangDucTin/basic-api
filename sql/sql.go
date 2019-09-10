@@ -68,7 +68,7 @@ func Find(database, table string, response interface{}, condition interface{}) e
 	if err != nil {
 		return err
 	}
-	var objects []map[string]interface{}
+	var objects map[string]interface{}
 	for rows.Next() {
 		columns, err := rows.ColumnTypes()
 		if err != nil {
@@ -87,7 +87,8 @@ func Find(database, table string, response interface{}, condition interface{}) e
 			return err
 		}
 
-		objects = append(objects, object)
+		objects = object
+		break
 	}
 	b, err := json.Marshal(objects)
 	if err != nil {
