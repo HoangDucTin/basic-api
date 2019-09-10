@@ -41,11 +41,19 @@ func Close() error {
 
 // This function finds one latest record
 // from given table within given database.
-func Find(database, table string, response interface{}, condition map[string]interface{}) error {
+func Find(database, table string, response interface{}, condition interface{}) error {
 	selectStatement := fmt.Sprintf("USE %v; SELECT TOP %v * FROM %v", database, 1, table)
 	if condition != nil {
+		b, err := json.Marshal(condition)
+		if err != nil {
+			return err
+		}
+		var conditionMap map[string]interface{}
+		if err := json.Unmarshal(b, &conditionMap); err != nil {
+			return err
+		}
 		selectStatement += fmt.Sprintf(" WHERE 1 = 1")
-		for key, value := range condition {
+		for key, value := range conditionMap {
 			if to := reflect.TypeOf(value); to.Kind() == reflect.String {
 				value = fmt.Sprintf("'%v'", value)
 			}
@@ -94,12 +102,20 @@ func Find(database, table string, response interface{}, condition map[string]int
 
 // This function finds all the records
 // from given table within given database.
-func FindAll(database, table string, response interface{}, condition map[string]interface{}) error {
+func FindAll(database, table string, response interface{}, condition interface{}) error {
 	selectStatement := fmt.Sprintf("USE %v; SELECT * FROM %v", database, table)
 	logger.Warn("condition: %+v", condition)
 	if condition != nil {
+		b, err := json.Marshal(condition)
+		if err != nil {
+			return err
+		}
+		var conditionMap map[string]interface{}
+		if err := json.Unmarshal(b, &conditionMap); err != nil {
+			return err
+		}
 		selectStatement += fmt.Sprintf(" WHERE 1 = 1")
-		for key, value := range condition {
+		for key, value := range conditionMap {
 			if to := reflect.TypeOf(value); to.Kind() == reflect.String {
 				value = fmt.Sprintf("'%v'", value)
 			}
@@ -149,11 +165,19 @@ func FindAll(database, table string, response interface{}, condition map[string]
 // This function returns a number of
 // latest records by given limit number
 // from given table within given database.
-func FindWithLimit(database, table string, limit int, response []interface{}, condition map[string]interface{}) error {
+func FindWithLimit(database, table string, limit int, response interface{}, condition interface{}) error {
 	selectStatement := fmt.Sprintf("USE %v; SELECT TOP %v * FROM %v", database, limit, table)
 	if condition != nil {
+		b, err := json.Marshal(condition)
+		if err != nil {
+			return err
+		}
+		var conditionMap map[string]interface{}
+		if err := json.Unmarshal(b, &conditionMap); err != nil {
+			return err
+		}
 		selectStatement += fmt.Sprintf(" WHERE 1 = 1")
-		for key, value := range condition {
+		for key, value := range conditionMap {
 			if to := reflect.TypeOf(value); to.Kind() == reflect.String {
 				value = fmt.Sprintf("'%v'", value)
 			}
@@ -205,12 +229,20 @@ func FindWithLimit(database, table string, limit int, response []interface{}, co
 // from the selector within the
 // given table inside the given
 // database.
-func Update(database, table string, selector map[string]interface{}, updater map[string]interface{}) error {
+func Update(database, table string, selector interface{}, updater interface{}) error {
 	if updater == nil {
 		return errors.New("can not update record(s) without updater")
 	}
+	b, err := json.Marshal(updater)
+	if err != nil {
+		return err
+	}
+	var updaterMap map[string]interface{}
+	if err := json.Unmarshal(b, &updaterMap); err != nil {
+		return err
+	}
 	updateStatement := fmt.Sprintf("USE %v; UPDATE %v SET ", database, table)
-	for key, value := range updater {
+	for key, value := range updaterMap {
 		if to := reflect.TypeOf(value); to.Kind() == reflect.String {
 			value = fmt.Sprintf("'%v'", value)
 		}
@@ -218,7 +250,15 @@ func Update(database, table string, selector map[string]interface{}, updater map
 	}
 	if selector != nil {
 		updateStatement += " WHERE 1 = 1"
-		for key, value := range selector {
+		b, err := json.Marshal(selector)
+		if err != nil {
+			return err
+		}
+		var selectorMap map[string]interface{}
+		if err := json.Unmarshal(b, &selectorMap); err != nil {
+			return err
+		}
+		for key, value := range selectorMap {
 			if to := reflect.TypeOf(value); to.Kind() == reflect.String {
 				value = fmt.Sprintf("'%v'", value)
 			}
@@ -235,12 +275,20 @@ func Update(database, table string, selector map[string]interface{}, updater map
 // selected by the give selector
 // with the given table, inside the
 // given database.
-func Delete(database, table string, selector map[string]interface{}) error {
+func Delete(database, table string, selector interface{}) error {
 	if selector == nil {
 		return errors.New("can not delete record(s) without selector")
 	}
+	b, err := json.Marshal(selector)
+	if err != nil {
+		return err
+	}
+	var selectorMap map[string]interface{}
+	if err := json.Unmarshal(b, &selectorMap); err != nil {
+		return err
+	}
 	deleteStatement := fmt.Sprintf("USE %v; DELETE FROM %v WHERE 1 = 1", database, table)
-	for key, value := range selector {
+	for key, value := range selectorMap {
 		if to := reflect.TypeOf(value); to.Kind() == reflect.String {
 			value = fmt.Sprintf("'%v'", value)
 		}
@@ -252,20 +300,61 @@ func Delete(database, table string, selector map[string]interface{}) error {
 	return nil
 }
 
-// This function inserts records to
+// This function inserts one record to
 // the given table and database names.
-func Insert(database, table string, data map[string]interface{}) error {
+func Insert(database, table string, data interface{}) error {
 	if data == nil {
 		return errors.New("can not insert nil data")
 	}
+	b, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+	var m map[string]interface{}
+	if err := json.Unmarshal(b, &m); err != nil {
+		return err
+	}
 	insertStatement := fmt.Sprintf("USE %v; INSERT INTO %v VALUES(",database, table)
-	for _, value := range data {
+	for _, value := range m {
 		if to := reflect.TypeOf(value); to.Kind() == reflect.String {
 			value = fmt.Sprintf("'%v'", value)
 		}
 		insertStatement += fmt.Sprintf("%v, ", value)
 	}
 	insertStatement = insertStatement[:len(insertStatement) - 2] + ")"
+	if _, err := db.Exec(insertStatement); err != nil {
+		return err
+	}
+	return nil
+}
+
+// This function inserts multiple
+// records to the given table and
+// database name.
+func InsertMany(database, table string, data interface{}) error {
+	if data == nil {
+		return errors.New("can not insert nil data")
+	}
+	b, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+	var m []map[string]interface{}
+	if err := json.Unmarshal(b, &m); err != nil {
+		return err
+	}
+	insertStatement := fmt.Sprintf("USE %v; INSERT INTO %v VALUES", database, table)
+	for _, info := range m {
+		insertStatement += "("
+		for _, value := range info {
+			if to := reflect.TypeOf(value); to.Kind() == reflect.String {
+				value = fmt.Sprintf("'%v'", value)
+			}
+			insertStatement += fmt.Sprintf("%v, ", value)
+		}
+		insertStatement = insertStatement[:len(insertStatement) - 2] + "),"
+	}
+	insertStatement = insertStatement[:len(insertStatement)-1]
 	if _, err := db.Exec(insertStatement); err != nil {
 		return err
 	}
