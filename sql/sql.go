@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	_ "github.com/denisenkom/go-mssqldb"
-	"github.com/tinwoan-go/basic-api/logger"
 	"reflect"
 )
 
@@ -105,7 +104,6 @@ func Find(database, table string, response interface{}, condition interface{}) e
 // from given table within given database.
 func FindAll(database, table string, response interface{}, condition interface{}) error {
 	selectStatement := fmt.Sprintf("USE %v; SELECT * FROM %v", database, table)
-	logger.Warn("condition: %+v", condition)
 	if condition != nil {
 		b, err := json.Marshal(condition)
 		if err != nil {

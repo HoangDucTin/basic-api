@@ -3,7 +3,6 @@ package mongo
 import (
 	"errors"
 	"github.com/globalsign/mgo"
-	"github.com/tinwoan-go/basic-api/logger"
 	"strings"
 	"time"
 )
@@ -46,7 +45,6 @@ func Close() {
 		session = nil
 		return
 	}
-	logger.Warn("Session does not exist or has already been closed")
 }
 
 func cloneSession() *mgo.Session {
