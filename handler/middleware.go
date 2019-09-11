@@ -45,8 +45,10 @@ func NewLogMiddleware(next http.Handler) http.Handler {
 		logFields["RemoteAddr"] = r.RemoteAddr
 		logFields["UserAgent"] = r.UserAgent()
 		ct := r.Header.Get("Content-Type")
+		isJson := strings.HasPrefix(ct, "application/json")
+		isXml := strings.HasPrefix(ct, "text/xml")
 		switch {
-		case strings.HasPrefix(ct, "application/json"):
+		case isJson:
 			buf, _ := ioutil.ReadAll(r.Body)
 			rdr1 := ioutil.NopCloser(bytes.NewBuffer(buf))
 			rdr2 := ioutil.NopCloser(bytes.NewBuffer(buf))
@@ -54,7 +56,7 @@ func NewLogMiddleware(next http.Handler) http.Handler {
 			var req interface{}
 			_ = json.NewDecoder(rdr1).Decode(&req)
 			logFields["RequestBody"] = req
-		case strings.HasPrefix(ct, "text/xml"):
+		case isXml:
 			buf, _ := ioutil.ReadAll(r.Body)
 			rdr1 := ioutil.NopCloser(bytes.NewBuffer(buf))
 			rdr2 := ioutil.NopCloser(bytes.NewBuffer(buf))
@@ -69,7 +71,12 @@ func NewLogMiddleware(next http.Handler) http.Handler {
 		}
 		next.ServeHTTP(loggingRW, r)
 		var res interface{}
-		_ = json.Unmarshal(loggingRW.body, &res)
+		switch {
+		case isJson:
+			_ = json.Unmarshal(loggingRW.body, &res)
+		case isXml:
+			_ = xml.Unmarshal(loggingRW.body, &res)
+		}
 		logFields["ResponseBody"] = res
 		logFields["Status"] = loggingRW.status
 		logFields["ProcessTime"] = fmt.Sprintf("%v", time.Since(start))
