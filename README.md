@@ -99,7 +99,7 @@ import (
 )
 
 func main() {
-	// Connect to you local mongo server, into database name "database"
+	// Connect to your local mongo server, into database name "database"
 	// with user "user" and password "password", and the timeout for
 	// the connection will be 10 seconds.
 	if err := mongo.NewMongoClient("127.0.0.1:27017", "database", "user", "password", 10 * time.Second); err != nil {
@@ -110,3 +110,81 @@ func main() {
 	defer mongo.Close()
 }
 ```
+This package provides methods to find a record (Find), find all records (FindAll), insert a record (Insert), insert many records (InsertAll), remove a latest record (Remove), remove all records (RemoveAll), update a latest record (Update) and update all records (UpdateAll).
+### Redis
+This library provides a package for connecting to Redis server, based on "github.com/go-redis/redis".
+First thing first, you need to initiate the connection to Redis server for your application.
+```go
+package main
+
+import (
+	"github.com/tinwoan-go/basic-api/logger"
+	"github.com/tinwoan-go/basic-api/redis"
+)
+
+func main() {
+	// Connect to your local redis server
+	// with user "user" and password "password".
+	// If you don't use tunnels on your
+	// Redis server, leave the master name empty.
+	masterName := ""
+	addrs := []string{"127.0.0.1:6379"}
+	if err := redis.NewRedisClient("", "user", "password", addrs); err != nil {
+		panic(err)
+	}
+	
+	// Do not forget to close the connection
+	// to redis server after using it.
+	defer func(){
+		if err := redis.Close(); err != nil {
+			logger.Warn("Can not close connection to Redis server, error: %v", err)
+	}()
+}
+```
+This package provides 2 simple method to get data from Redis server (Get) and set a value to redis server with a specified key (Set).
+### SQL
+This library provides a package named "sql" for connecting and interacting with SQL server.
+(Caution: Because this package is built on the purpose of making things generic, I've use the json format in some cases and I'm trying to implement it to a better phase.)
+First thing first, you have to initiate the connection to SQL server if you want to use it.
+(Notice: In my library, I used driver "github.com/denisenkom/go-mssqldb" for connect with local Microsoft SQL server.)
+```go
+package main
+
+import (
+	"github.com/tinwoan-go/basic-api/logger"
+	"github.com/tinwoan-go/basic-api/sql"
+)
+
+func main() {
+	// Connect to your local Microsoft SQL server
+	// with user "user" and password "password",
+	// and connect directly to database "database".
+	if err := sql.NewSql("localhost", "user", "password", "database"); err != nil {
+		panic(err)
+	}
+
+	// Do not forget to close the connection
+	// to your SQL server after using it.
+	defer func() {
+		if err := sql.Close(); err != nil {
+			logger.Error("Cannot close connection to SQL server, error: %v", err)
+		}
+	}()
+}
+```
+This package provides methods to find one (Find), find all (FindAll), find with a limit (FindWithLimit), insert one (Insert), insert many (InsertMany), delete (Delete), update (Update).
+
+Caution:
+	To use this package, your structs must have json tag.
+	Example:
+```go
+type Test struct {
+	Message string `json:"message"`
+}
+```
+	And the json tags should have the same names with the name of the columns in your SQL database.
+	And the fields in the structs should have the same order with the order of the columns in your SQL database.
+	
+	Most of the functions can use parameters either in structs or in map[string]interface{}.
+	(For now the generic implementation for SQL server has not been introduced yet, so I've used the json tag for this purpose.
+	Sorry for the inconvinience and I'll improve it in the future.)
