@@ -2,12 +2,13 @@ package server
 
 import (
 	"context"
-	"github.com/go-chi/chi"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/go-chi/chi"
 )
 
 func serveWithGracefulShutdown(server *http.Server, timeout time.Duration, proc func() error) error {
@@ -39,7 +40,7 @@ func serveWithGracefulShutdown(server *http.Server, timeout time.Duration, proc 
 	return errShutdown
 }
 
-// This function serves the server
+// ServeHTTP serves the server
 // on HTTP protocol.
 func ServeHTTP(routers *chi.Mux, address string, timeout time.Duration) error {
 	server := &http.Server{
@@ -52,7 +53,7 @@ func ServeHTTP(routers *chi.Mux, address string, timeout time.Duration) error {
 	})
 }
 
-// This function serves the server
+// ServeHTTPS serves the server
 // on HTTPS protocol.
 func ServeHTTPS(routers *chi.Mux, publicKey, privateKey, address string, timeout time.Duration) error {
 

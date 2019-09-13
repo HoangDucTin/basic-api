@@ -5,15 +5,16 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
-	"github.com/go-chi/chi/middleware"
-	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/go-chi/chi/middleware"
+	"github.com/sirupsen/logrus"
 )
 
-// This middleware will set the header
+// SetNoCacheHeader will set the header
 // of each and every request to store
 // no cache.
 func SetNoCacheHeader(next http.Handler) http.Handler {
@@ -25,7 +26,7 @@ func SetNoCacheHeader(next http.Handler) http.Handler {
 	})
 }
 
-// This middleware will print out
+// NewLogMiddleware will print out
 // the request and response of each
 // and every request in JSON format
 // (suitable for elastic search).
@@ -45,10 +46,10 @@ func NewLogMiddleware(next http.Handler) http.Handler {
 		logFields["RemoteAddr"] = r.RemoteAddr
 		logFields["UserAgent"] = r.UserAgent()
 		ct := r.Header.Get("Content-Type")
-		isJson := strings.HasPrefix(ct, "application/json")
-		isXml := strings.HasPrefix(ct, "text/xml")
+		isJSON := strings.HasPrefix(ct, "application/json")
+		isXML := strings.HasPrefix(ct, "text/xml")
 		switch {
-		case isJson:
+		case isJSON:
 			buf, _ := ioutil.ReadAll(r.Body)
 			rdr1 := ioutil.NopCloser(bytes.NewBuffer(buf))
 			rdr2 := ioutil.NopCloser(bytes.NewBuffer(buf))
@@ -56,7 +57,7 @@ func NewLogMiddleware(next http.Handler) http.Handler {
 			var req interface{}
 			_ = json.NewDecoder(rdr1).Decode(&req)
 			logFields["RequestBody"] = req
-		case isXml:
+		case isXML:
 			buf, _ := ioutil.ReadAll(r.Body)
 			rdr1 := ioutil.NopCloser(bytes.NewBuffer(buf))
 			rdr2 := ioutil.NopCloser(bytes.NewBuffer(buf))
@@ -72,14 +73,14 @@ func NewLogMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(loggingRW, r)
 		var res interface{}
 		switch {
-		case isJson:
+		case isJSON:
 			_ = json.Unmarshal(loggingRW.body, &res)
 			logFields["ResponseBody"] = res
-		case isXml:
+		case isXML:
 			_ = xml.Unmarshal(loggingRW.body, &res)
 			logFields["ResponseBody"] = res
 		default:
-			logFields["UnsupportedContentType"] = ct
+			logFields["ErrUnsupportedContentType"] = ct
 		}
 		logFields["Status"] = loggingRW.status
 		logFields["ProcessTime"] = time.Since(start).String()

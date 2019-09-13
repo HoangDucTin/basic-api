@@ -5,25 +5,31 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	_ "github.com/denisenkom/go-mssqldb"
-	"github.com/tinwoan-go/basic-api/utils"
 	"reflect"
+
+	// This import is for the driver to
+	// connect Microsoft SQL server.
+	_ "github.com/denisenkom/go-mssqldb"
+
+	"github.com/tinwoan-go/basic-api/utils"
 )
 
 const (
 	sqlConnectionStringFormat = "server=%v;user id=%v;password=%v;database=%v;"
-	NilParamErr               = "nil parameter"
 )
 
 var (
-	db *sql.DB
+	db          *sql.DB
+	// ErrNilParam shows that the
+	// passed in parameter is nil.
+	ErrNilParam = errors.New("nil parameter")
 )
 
-// This function creates an instance
+// NewSQL creates an instance
 // of SQL database connection, based
 // on given host, username, password
 // and database name.
-func NewSql(host, username, password, database string) error {
+func NewSQL(host, username, password, database string) error {
 	connString := fmt.Sprintf(sqlConnectionStringFormat, host, username, password, database)
 	switch sqlDB, err := sql.Open("mssql", connString); {
 	case err != nil:
@@ -34,14 +40,14 @@ func NewSql(host, username, password, database string) error {
 	}
 }
 
-// This function closes the connection
+// Close closes the connection
 // of SQL database, based on the
 // current instance in application.
 func Close() error {
 	return db.Close()
 }
 
-// This function finds one latest record
+// Find finds one latest record
 // from given table within given database.
 // Parameter 'condition' can either be a
 // struct with json tag, or a
@@ -52,7 +58,7 @@ func Find(table string, response interface{}, condition interface{}) error {
 	selectStatement := fmt.Sprintf("SELECT TOP %v * FROM %v", 1, table)
 	switch conditionMap, err := BuildMap(condition); {
 	case err != nil:
-		if err.Error() != NilParamErr {
+		if err != ErrNilParam {
 			return err
 		}
 	case conditionMap != nil:
@@ -108,7 +114,7 @@ func Find(table string, response interface{}, condition interface{}) error {
 	return nil
 }
 
-// This function finds all the records
+// FindAll finds all the records
 // from given table within given database.
 // Parameter 'condition' can either be a
 // struct with json tags or a
@@ -119,7 +125,7 @@ func FindAll(table string, response interface{}, condition interface{}) error {
 	selectStatement := fmt.Sprintf("SELECT * FROM %v", table)
 	switch conditionMap, err := BuildMap(condition); {
 	case err != nil:
-		if err.Error() != NilParamErr {
+		if err != ErrNilParam {
 			return err
 		}
 	case conditionMap != nil:
@@ -174,7 +180,7 @@ func FindAll(table string, response interface{}, condition interface{}) error {
 	return nil
 }
 
-// This function returns a number of
+// FindWithLimit returns a number of
 // latest records by given limit number
 // from given table within given database.
 // Parameter 'condition' can either be a
@@ -189,7 +195,7 @@ func FindWithLimit(table string, limit int, response interface{}, condition inte
 	selectStatement := fmt.Sprintf("SELECT TOP %v * FROM %v", limit, table)
 	switch conditionMap, err := BuildMap(condition); {
 	case err != nil:
-		if err.Error() != NilParamErr {
+		if err != ErrNilParam {
 			return err
 		}
 	case conditionMap != nil:
@@ -244,7 +250,7 @@ func FindWithLimit(table string, limit int, response interface{}, condition inte
 	return nil
 }
 
-// This function updates the records
+// Update updates the records
 // satisfied the updater with the values
 // from the selector within the
 // given table inside the given
@@ -260,7 +266,7 @@ func FindWithLimit(table string, limit int, response interface{}, condition inte
 func Update(table string, selector interface{}, updater interface{}) error {
 	updaterMap, err := BuildMap(updater)
 	if err != nil {
-		if err.Error() == NilParamErr {
+		if err == ErrNilParam {
 			return errors.New("can not update record(s) without updater")
 		}
 		return err
@@ -268,7 +274,7 @@ func Update(table string, selector interface{}, updater interface{}) error {
 	defer utils.MapDestructor(updaterMap)
 	selectorMap, err := BuildMap(selector)
 	if err != nil {
-		if err.Error() == NilParamErr {
+		if err == ErrNilParam {
 			return errors.New("can not update record(s) without selector")
 		}
 		return err
@@ -296,7 +302,7 @@ func Update(table string, selector interface{}, updater interface{}) error {
 	return nil
 }
 
-// This function deletes the records
+// Delete deletes the records
 // selected by the give selector
 // with the given table, inside the
 // given database.
@@ -307,7 +313,7 @@ func Update(table string, selector interface{}, updater interface{}) error {
 func Delete(table string, selector interface{}) error {
 	selectorMap, err := BuildMap(selector)
 	if err != nil {
-		if err.Error() == NilParamErr {
+		if err == ErrNilParam {
 			return errors.New("can not delete record(s) without selector")
 		}
 		return err
@@ -326,7 +332,7 @@ func Delete(table string, selector interface{}) error {
 	return nil
 }
 
-// This function inserts one record to
+// Insert inserts one record to
 // the given table and database names.
 // Parameter 'data' can either be a struct
 // with json tags or a map[string]interface{}
@@ -338,7 +344,7 @@ func Delete(table string, selector interface{}) error {
 func Insert(table string, data interface{}) error {
 	insertMap, err := BuildMap(data)
 	if err != nil {
-		if err.Error() == NilParamErr {
+		if err == ErrNilParam {
 			return errors.New("can not insert nil data")
 		}
 		return err
@@ -358,7 +364,7 @@ func Insert(table string, data interface{}) error {
 	return nil
 }
 
-// This function inserts multiple
+// InsertMany inserts multiple
 // records to the given table and
 // database name.
 // Parameter 'data' can either be a struct
@@ -371,7 +377,7 @@ func Insert(table string, data interface{}) error {
 func InsertMany(table string, data interface{}) error {
 	insertMap, err := BuildListMap(data)
 	if err != nil {
-		if err.Error() == NilParamErr {
+		if err == ErrNilParam {
 			return errors.New("can not insert nil data")
 		}
 		return err
@@ -395,11 +401,11 @@ func InsertMany(table string, data interface{}) error {
 	return nil
 }
 
-// This function returns a map[string]interface{}
+// BuildMap returns a map[string]interface{}
 // built from parameter 'parameter'.
 func BuildMap(parameter interface{}) (map[string]interface{}, error) {
 	if parameter == nil {
-		return nil, errors.New(NilParamErr)
+		return nil, ErrNilParam
 	}
 	var parameterMap map[string]interface{}
 	switch m, ok := parameter.(map[string]interface{}); {
@@ -417,12 +423,12 @@ func BuildMap(parameter interface{}) (map[string]interface{}, error) {
 	}
 }
 
-// This function returns a list of
+// BuildListMap returns a list of
 // map[string]interface{} built from
 // parameter 'parameter.
 func BuildListMap(parameter interface{}) ([]map[string]interface{}, error) {
 	if parameter == nil {
-		return nil, errors.New(NilParamErr)
+		return nil, ErrNilParam
 	}
 	var parameterListMap []map[string]interface{}
 	switch lm, ok := parameter.([]map[string]interface{}); {

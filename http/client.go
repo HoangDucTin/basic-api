@@ -6,21 +6,24 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"errors"
-	"github.com/tinwoan-go/basic-api/logger"
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/tinwoan-go/basic-api/logger"
 )
 
 var (
-	client                 *http.Client
-	contentType            = "Content-Type"
-	jsonContentType        = "application/json"
-	xmlContentType         = "text/xml;charset=UTF-8"
-	UnsupportedContentType = "unsupported Content-Type"
+	client                    *http.Client
+	contentType               = "Content-Type"
+	jsonContentType           = "application/json"
+	xmlContentType            = "text/xml;charset=UTF-8"
+	// ErrUnsupportedContentType points out the
+	// unsupported Content-Type of the request.
+	ErrUnsupportedContentType = errors.New("unsupported Content-Type")
 )
 
-// This function will create an
+// NewHTTPClient will create an
 // instance of HTTP client base
 // on the proxyURL and timeout
 // to help your server call to
@@ -46,7 +49,7 @@ func NewHTTPClient(proxyURL string, timeout time.Duration) error {
 	return nil
 }
 
-// This function will disconnect
+// Close will disconnect
 // the HTTP instance and close
 // the connection.
 func Close() {
@@ -54,7 +57,7 @@ func Close() {
 	client.CloseIdleConnections()
 }
 
-// This function sends a post request
+// PostJSON sends a post request
 // to the server with given url.
 // Both request and response will be
 // in JSON format.
@@ -65,7 +68,7 @@ func PostJSON(url, username, password string, request, response interface{}) err
 	return post(url, jsonContentType, username, password, request, response)
 }
 
-// This function sends a get request
+// GetJSON sends a get request
 // to the server with given url.
 // Both request and response will be
 // in JSON format.
@@ -76,7 +79,7 @@ func GetJSON(url, username, password string, response interface{}) error {
 	return get(url, jsonContentType, username, password, response)
 }
 
-// This function sends a post request
+// PostXML sends a post request
 // to the server with given url.
 // Both request and response will be
 // in XML format.
@@ -87,7 +90,7 @@ func PostXML(url, username, password string, request, response interface{}) erro
 	return post(url, xmlContentType, username, password, request, response)
 }
 
-// This function sends a get request
+// GetXML sends a get request
 // to the server with given url.
 // Both request and response will be
 // in XML format.
@@ -120,7 +123,7 @@ func post(url, ct, user, pass string, request, response interface{}) error {
 			return err
 		}
 	default:
-		return errors.New(UnsupportedContentType)
+		return ErrUnsupportedContentType
 	}
 	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(b))
 	if err != nil {
@@ -145,7 +148,7 @@ func post(url, ct, user, pass string, request, response interface{}) error {
 	case xmlContentType:
 		return xml.NewDecoder(res.Body).Decode(&response)
 	default:
-		return errors.New(UnsupportedContentType)
+		return ErrUnsupportedContentType
 	}
 }
 
@@ -178,7 +181,7 @@ func get(url, ct, user, pass string, response interface{}) error {
 	case xmlContentType:
 		return xml.NewDecoder(res.Body).Decode(&response)
 	default:
-		return errors.New(UnsupportedContentType)
+		return ErrUnsupportedContentType
 	}
 }
 

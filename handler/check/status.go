@@ -1,11 +1,12 @@
 package check
 
 import (
-	"github.com/go-chi/render"
 	"net/http"
+
+	"github.com/go-chi/render"
 )
 
-// This HandlerFunc will response
+// Status will response
 // HTTP status 200 for the purpose
 // of health checking.
 func Status() http.HandlerFunc {

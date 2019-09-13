@@ -4,10 +4,11 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/render"
+
 	"github.com/tinwoan-go/basic-api/handler/check"
 )
 
-// This function returns an example
+// NewRouter returns an example
 // handler for your service with
 // an echo function to check.
 // It also provide the applying of

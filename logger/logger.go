@@ -5,7 +5,7 @@ import (
 	"log"
 )
 
-// This function will print out
+// Fail print out
 // your message with the prefix
 // FAIL.
 func Fail(format interface{}, args ...interface{}) {
@@ -18,13 +18,13 @@ func Fail(format interface{}, args ...interface{}) {
 		return
 	}
 	var a string
-	for _, _ = range args {
+	for range args {
 		a += "%v "
 	}
 	log.Println("FAIL", format, fmt.Sprintf(a, args...))
 }
 
-// This function will print out
+// Help will print out
 // your message with the prefix
 // HELP.
 func Help(format interface{}, args ...interface{}) {
@@ -37,13 +37,13 @@ func Help(format interface{}, args ...interface{}) {
 		return
 	}
 	var a string
-	for _, _ = range args {
+	for range args {
 		a += "%v "
 	}
 	log.Println("HELP", format, fmt.Sprintf(a, args...))
 }
 
-// This function will print out
+// Info will print out
 // your message with the prefix
 // INFO.
 func Info(format interface{}, args ...interface{}) {
@@ -56,13 +56,13 @@ func Info(format interface{}, args ...interface{}) {
 		return
 	}
 	var a string
-	for _, _ = range args {
+	for range args {
 		a += "%v "
 	}
 	log.Println("INFO", format, fmt.Sprintf(a, args...))
 }
 
-// This function will print out
+// Warn will print out
 // your message with the prefix
 // WARN.
 func Warn(format interface{}, args ...interface{}) {
@@ -75,13 +75,13 @@ func Warn(format interface{}, args ...interface{}) {
 		return
 	}
 	var a string
-	for _, _ = range args {
+	for range args {
 		a += "%v "
 	}
 	log.Println("WARN", format, fmt.Sprintf(a, args...))
 }
 
-// This function will print out
+// Exit will print out
 // your message with the prefix
 // EXIT.
 func Exit(format interface{}, args ...interface{}) {
@@ -94,13 +94,13 @@ func Exit(format interface{}, args ...interface{}) {
 		return
 	}
 	var a string
-	for _, _ = range args {
+	for range args {
 		a += "%v "
 	}
 	log.Println("EXIT", format, fmt.Sprintf(a, args...))
 }
 
-// This function will print out
+// Error will print out
 // your message with the prefix
 // ERROR.
 func Error(format interface{}, args ...interface{}) {
@@ -113,7 +113,7 @@ func Error(format interface{}, args ...interface{}) {
 		return
 	}
 	var a string
-	for _, _ = range args {
+	for range args {
 		a += "%v "
 	}
 	log.Println("ERROR", format, fmt.Sprintf(a, args...))

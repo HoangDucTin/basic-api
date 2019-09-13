@@ -2,16 +2,21 @@ package mongo
 
 import (
 	"errors"
-	"github.com/globalsign/mgo"
 	"strings"
 	"time"
+
+	"github.com/globalsign/mgo"
 )
 
-var session *mgo.Session
+var (
+	session *mgo.Session
+	// ErrInitialized is returned when
+	// cannot clone from the current
+	// MongoDB session.
+	ErrInitialized = errors.New("MongoDB connection has not been initialized")
+)
 
-const InitializedError = "MongoDB connection has not been initialized"
-
-// This function creates an instance
+// NewMongoClient creates an instance
 // of MongoDB session based on given
 // addresses, database name, username
 // and password. The timeout duration
@@ -37,7 +42,7 @@ func NewMongoClient(addresses, database, username, password string, timeout time
 	}
 }
 
-// This function closes the session
+// Close closes the session
 // to connect with MongoDB.
 func Close() {
 	if session != nil {
@@ -54,54 +59,54 @@ func cloneSession() *mgo.Session {
 	return session.Copy()
 }
 
-// This function finds one specific record
+// Find finds one specific record
 // based on given selector, in side
 // the collection within the database
 // that are given the names.
 func Find(database, collection string, selector, result interface{}) error {
 	s := cloneSession()
 	if s == nil {
-		return errors.New(InitializedError)
+		return ErrInitialized
 	}
 	defer s.Close()
 	return s.DB(database).C(collection).Find(selector).One(&result)
 }
 
-// This function finds every record
+// FindAll finds every record
 // based on given selector, in side
 // the collection within the database,
 // which are given the names.
 func FindAll(database, collection string, selector, result interface{}) error {
 	s := cloneSession()
 	if s == nil {
-		return errors.New(InitializedError)
+		return ErrInitialized
 	}
 	defer s.Close()
 	return s.DB(database).C(collection).Find(selector).All(&result)
 }
 
-// This function inserts one record
+// Insert inserts one record
 // with the given data into the collection
 // within the database, which are given
 // names.
 func Insert(database, collection string, data interface{}) error {
 	s := cloneSession()
 	if s == nil {
-		return errors.New(InitializedError)
+		return ErrInitialized
 	}
 	defer s.Close()
 
 	return s.DB(database).C(collection).Insert(data)
 }
 
-// This function inserts all the records
+// InsertAll inserts all the records
 // given by the list into the collection
 // within the database, which are given
 // names.
 func InsertAll(database, collection string, list []interface{}) error {
 	s := cloneSession()
 	if s == nil {
-		return errors.New(InitializedError)
+		return ErrInitialized
 	}
 	defer s.Close()
 
@@ -114,26 +119,26 @@ func InsertAll(database, collection string, list []interface{}) error {
 	return err
 }
 
-// This function removes latest record
+// Remove removes latest record
 // with the given selector from collection
 // in database, which are given names.
 func Remove(database, collection string, selector interface{}) error {
 	s := cloneSession()
 	if s == nil {
-		return errors.New(InitializedError)
+		return ErrInitialized
 	}
 	defer s.Close()
 
 	return s.DB(database).C(collection).Remove(selector)
 }
 
-// This function removes all the records
+// RemoveAll removes all the records
 // with the given selector from collection
 // in database, which are given names.
 func RemoveAll(database, collection string, selector interface{}) error {
 	s := cloneSession()
 	if s == nil {
-		return errors.New(InitializedError)
+		return ErrInitialized
 	}
 	defer s.Close()
 
@@ -141,28 +146,28 @@ func RemoveAll(database, collection string, selector interface{}) error {
 	return err
 }
 
-// This function updates latest record
+// Update updates latest record
 // selected by selector, with new data
 // is updater, within collection in
 // database, which are given names.
 func Update(database, collection string, selector, updater interface{}) error {
 	s := cloneSession()
 	if s == nil {
-		return errors.New(InitializedError)
+		return ErrInitialized
 	}
 	defer s.Close()
 
 	return s.DB(database).C(collection).Update(selector, updater)
 }
 
-// This function updates all the records
+// UpdateAll updates all the records
 // selected by selector, with new data
 // is updater, within collection in
 // database, which are given names.
 func UpdateAll(database, collection string, selector, updater interface{}) error {
 	s := cloneSession()
 	if s == nil {
-		return errors.New(InitializedError)
+		return ErrInitialized
 	}
 	defer s.Close()
 
@@ -170,7 +175,7 @@ func UpdateAll(database, collection string, selector, updater interface{}) error
 	return err
 }
 
-// This function updates the latest record
+// Change updates the latest record
 // selected by the selector, with the given
 // new data, within collection in database,
 // which are given names. This function
@@ -179,7 +184,7 @@ func UpdateAll(database, collection string, selector, updater interface{}) error
 func Change(database, collection string, selector, new, result interface{}) error {
 	s := cloneSession()
 	if s == nil {
-		return errors.New(InitializedError)
+		return ErrInitialized
 	}
 	defer s.Close()
 

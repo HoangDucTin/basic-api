@@ -1,10 +1,14 @@
 package utils
 
 import (
-	"github.com/tinwoan-go/basic-api/logger"
 	"reflect"
+
+	"github.com/tinwoan-go/basic-api/logger"
 )
 
+// MapDestructor releases elements
+// in "target" in case it's a map
+// or a list of maps.
 func MapDestructor(target interface{}) {
 	if m, ok := target.(map[string]interface{}); ok {
 		singleMap(m)
