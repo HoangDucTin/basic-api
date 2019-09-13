@@ -25,11 +25,8 @@ func NewRouter() *chi.Mux {
 	r.Use(NewLogMiddleware)
 
 	r.Route("/", func(r chi.Router) {
-		r.Route("/check", func(r chi.Router) {
-			r.Get("/echo", check.Echo())
-		})
+		r.Get("/status", check.Status())
 	})
-
 	return r
 }
 

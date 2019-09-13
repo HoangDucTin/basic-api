@@ -6,11 +6,13 @@ import (
 	"errors"
 	"fmt"
 	_ "github.com/denisenkom/go-mssqldb"
+	"github.com/tinwoan-go/basic-api/utils"
 	"reflect"
 )
 
 const (
-	sqlConnectionStringFormat = "server=%v;user id=%v;password=%v;"
+	sqlConnectionStringFormat = "server=%v;user id=%v;password=%v;database=%v;"
+	NilParamErr               = "nil parameter"
 )
 
 var (
@@ -19,9 +21,10 @@ var (
 
 // This function creates an instance
 // of SQL database connection, based
-// on given host, username and password.
-func NewSql(host, username, password string) error {
-	connString := fmt.Sprintf(sqlConnectionStringFormat, host, username, password)
+// on given host, username, password
+// and database name.
+func NewSql(host, username, password, database string) error {
+	connString := fmt.Sprintf(sqlConnectionStringFormat, host, username, password, database)
 	switch sqlDB, err := sql.Open("mssql", connString); {
 	case err != nil:
 		return err
@@ -40,17 +43,19 @@ func Close() error {
 
 // This function finds one latest record
 // from given table within given database.
-func Find(database, table string, response interface{}, condition interface{}) error {
-	selectStatement := fmt.Sprintf("USE %v; SELECT TOP %v * FROM %v", database, 1, table)
-	if condition != nil {
-		b, err := json.Marshal(condition)
-		if err != nil {
+// Parameter 'condition' can either be a
+// struct with json tag, or a
+// map[string]interface{}.
+// The parameter 'response' MUST be a struct
+// with json tags attached to fields.
+func Find(table string, response interface{}, condition interface{}) error {
+	selectStatement := fmt.Sprintf("SELECT TOP %v * FROM %v", 1, table)
+	switch conditionMap, err := BuildMap(condition); {
+	case err != nil:
+		if err.Error() != NilParamErr {
 			return err
 		}
-		var conditionMap map[string]interface{}
-		if err := json.Unmarshal(b, &conditionMap); err != nil {
-			return err
-		}
+	case conditionMap != nil:
 		selectStatement += fmt.Sprintf(" WHERE 1 = 1")
 		for key, value := range conditionMap {
 			if to := reflect.TypeOf(value); to.Kind() == reflect.String {
@@ -58,7 +63,9 @@ func Find(database, table string, response interface{}, condition interface{}) e
 			}
 			selectStatement += fmt.Sprintf(" AND %v = %v", key, value)
 		}
+		defer utils.MapDestructor(conditionMap)
 	}
+
 	statement, err := db.Prepare(selectStatement)
 	if err != nil {
 		return err
@@ -68,6 +75,7 @@ func Find(database, table string, response interface{}, condition interface{}) e
 		return err
 	}
 	var objects map[string]interface{}
+	defer utils.MapDestructor(objects)
 	for rows.Next() {
 		columns, err := rows.ColumnTypes()
 		if err != nil {
@@ -102,17 +110,19 @@ func Find(database, table string, response interface{}, condition interface{}) e
 
 // This function finds all the records
 // from given table within given database.
-func FindAll(database, table string, response interface{}, condition interface{}) error {
-	selectStatement := fmt.Sprintf("USE %v; SELECT * FROM %v", database, table)
-	if condition != nil {
-		b, err := json.Marshal(condition)
-		if err != nil {
+// Parameter 'condition' can either be a
+// struct with json tags or a
+// map[string]interface{}
+// Parameter 'response' MUST be a struct
+// with json tags.
+func FindAll(table string, response interface{}, condition interface{}) error {
+	selectStatement := fmt.Sprintf("SELECT * FROM %v", table)
+	switch conditionMap, err := BuildMap(condition); {
+	case err != nil:
+		if err.Error() != NilParamErr {
 			return err
 		}
-		var conditionMap map[string]interface{}
-		if err := json.Unmarshal(b, &conditionMap); err != nil {
-			return err
-		}
+	case conditionMap != nil:
 		selectStatement += fmt.Sprintf(" WHERE 1 = 1")
 		for key, value := range conditionMap {
 			if to := reflect.TypeOf(value); to.Kind() == reflect.String {
@@ -120,7 +130,9 @@ func FindAll(database, table string, response interface{}, condition interface{}
 			}
 			selectStatement += fmt.Sprintf(" AND %v = %v", key, value)
 		}
+		defer utils.MapDestructor(conditionMap)
 	}
+
 	statement, err := db.Prepare(selectStatement)
 	if err != nil {
 		return err
@@ -130,6 +142,7 @@ func FindAll(database, table string, response interface{}, condition interface{}
 		return err
 	}
 	var objects []map[string]interface{}
+	defer utils.MapDestructor(objects)
 	for rows.Next() {
 		columns, err := rows.ColumnTypes()
 		if err != nil {
@@ -164,17 +177,22 @@ func FindAll(database, table string, response interface{}, condition interface{}
 // This function returns a number of
 // latest records by given limit number
 // from given table within given database.
-func FindWithLimit(database, table string, limit int, response interface{}, condition interface{}) error {
-	selectStatement := fmt.Sprintf("USE %v; SELECT TOP %v * FROM %v", database, limit, table)
-	if condition != nil {
-		b, err := json.Marshal(condition)
-		if err != nil {
+// Parameter 'condition' can either be a
+// struct with json tags or a
+// map[string]interface{}.
+// Parameter 'response' MUST be a struct
+// with json tags.
+func FindWithLimit(table string, limit int, response interface{}, condition interface{}) error {
+	if limit < 1 {
+		return nil
+	}
+	selectStatement := fmt.Sprintf("SELECT TOP %v * FROM %v", limit, table)
+	switch conditionMap, err := BuildMap(condition); {
+	case err != nil:
+		if err.Error() != NilParamErr {
 			return err
 		}
-		var conditionMap map[string]interface{}
-		if err := json.Unmarshal(b, &conditionMap); err != nil {
-			return err
-		}
+	case conditionMap != nil:
 		selectStatement += fmt.Sprintf(" WHERE 1 = 1")
 		for key, value := range conditionMap {
 			if to := reflect.TypeOf(value); to.Kind() == reflect.String {
@@ -182,7 +200,9 @@ func FindWithLimit(database, table string, limit int, response interface{}, cond
 			}
 			selectStatement += fmt.Sprintf(" AND %v = %v", key, value)
 		}
+		defer utils.MapDestructor(conditionMap)
 	}
+
 	statement, err := db.Prepare(selectStatement)
 	if err != nil {
 		return err
@@ -192,6 +212,7 @@ func FindWithLimit(database, table string, limit int, response interface{}, cond
 		return err
 	}
 	var objects []map[string]interface{}
+	defer utils.MapDestructor(objects)
 	for rows.Next() {
 		columns, err := rows.ColumnTypes()
 		if err != nil {
@@ -228,42 +249,47 @@ func FindWithLimit(database, table string, limit int, response interface{}, cond
 // from the selector within the
 // given table inside the given
 // database.
-func Update(database, table string, selector interface{}, updater interface{}) error {
-	if updater == nil {
-		return errors.New("can not update record(s) without updater")
-	}
-	b, err := json.Marshal(updater)
+// Parameter 'selector' can either be
+// a struct with json tags or a
+// map[string]interface{}, but MUST
+// be not nil.
+// Parameter 'updater' can either be a
+// struct with json tags or a
+// map[string]interface{}, but MUST
+// be not nil.
+func Update(table string, selector interface{}, updater interface{}) error {
+	updaterMap, err := BuildMap(updater)
 	if err != nil {
+		if err.Error() == NilParamErr {
+			return errors.New("can not update record(s) without updater")
+		}
 		return err
 	}
-	var updaterMap map[string]interface{}
-	if err := json.Unmarshal(b, &updaterMap); err != nil {
+	defer utils.MapDestructor(updaterMap)
+	selectorMap, err := BuildMap(selector)
+	if err != nil {
+		if err.Error() == NilParamErr {
+			return errors.New("can not update record(s) without selector")
+		}
 		return err
 	}
-	updateStatement := fmt.Sprintf("USE %v; UPDATE %v SET ", database, table)
+	defer utils.MapDestructor(selectorMap)
+	updateStatement := fmt.Sprintf("UPDATE %v SET ", table)
 	for key, value := range updaterMap {
 		if to := reflect.TypeOf(value); to.Kind() == reflect.String {
 			value = fmt.Sprintf("'%v'", value)
 		}
-		updateStatement += fmt.Sprintf(", %v = %v", key, value)
+		updateStatement += fmt.Sprintf("%v = %v, ", key, value)
 	}
-	if selector != nil {
-		updateStatement += " WHERE 1 = 1"
-		b, err := json.Marshal(selector)
-		if err != nil {
-			return err
+	updateStatement = updateStatement[:len(updateStatement)-2] + " WHERE 1 = 1"
+
+	for key, value := range selectorMap {
+		if to := reflect.TypeOf(value); to.Kind() == reflect.String {
+			value = fmt.Sprintf("'%v'", value)
 		}
-		var selectorMap map[string]interface{}
-		if err := json.Unmarshal(b, &selectorMap); err != nil {
-			return err
-		}
-		for key, value := range selectorMap {
-			if to := reflect.TypeOf(value); to.Kind() == reflect.String {
-				value = fmt.Sprintf("'%v'", value)
-			}
-			updateStatement += fmt.Sprintf(" AND %v = %v", key, value)
-		}
+		updateStatement += fmt.Sprintf(" AND %v = %v", key, value)
 	}
+
 	if _, err := db.Exec(updateStatement); err != nil {
 		return err
 	}
@@ -274,19 +300,20 @@ func Update(database, table string, selector interface{}, updater interface{}) e
 // selected by the give selector
 // with the given table, inside the
 // given database.
-func Delete(database, table string, selector interface{}) error {
-	if selector == nil {
-		return errors.New("can not delete record(s) without selector")
-	}
-	b, err := json.Marshal(selector)
+// Parameter 'selector' can either be
+// a struct with json tags or a
+// map[string]interface{}, but MUST
+// be not nil.
+func Delete(table string, selector interface{}) error {
+	selectorMap, err := BuildMap(selector)
 	if err != nil {
+		if err.Error() == NilParamErr {
+			return errors.New("can not delete record(s) without selector")
+		}
 		return err
 	}
-	var selectorMap map[string]interface{}
-	if err := json.Unmarshal(b, &selectorMap); err != nil {
-		return err
-	}
-	deleteStatement := fmt.Sprintf("USE %v; DELETE FROM %v WHERE 1 = 1", database, table)
+	defer utils.MapDestructor(selectorMap)
+	deleteStatement := fmt.Sprintf("DELETE FROM %v WHERE 1 = 1", table)
 	for key, value := range selectorMap {
 		if to := reflect.TypeOf(value); to.Kind() == reflect.String {
 			value = fmt.Sprintf("'%v'", value)
@@ -301,26 +328,30 @@ func Delete(database, table string, selector interface{}) error {
 
 // This function inserts one record to
 // the given table and database names.
-func Insert(database, table string, data interface{}) error {
-	if data == nil {
-		return errors.New("can not insert nil data")
-	}
-	b, err := json.Marshal(data)
+// Parameter 'data' can either be a struct
+// with json tags or a map[string]interface{}
+// but MUST be not nil.
+// In case parameter 'data' is a struct with
+// json tags, the order of the fields MUST
+// be the same order of fields in the
+// destination table.
+func Insert(table string, data interface{}) error {
+	insertMap, err := BuildMap(data)
 	if err != nil {
+		if err.Error() == NilParamErr {
+			return errors.New("can not insert nil data")
+		}
 		return err
 	}
-	var m map[string]interface{}
-	if err := json.Unmarshal(b, &m); err != nil {
-		return err
-	}
-	insertStatement := fmt.Sprintf("USE %v; INSERT INTO %v VALUES(",database, table)
-	for _, value := range m {
+	defer utils.MapDestructor(insertMap)
+	insertStatement := fmt.Sprintf("INSERT INTO %v VALUES(", table)
+	for _, value := range insertMap {
 		if to := reflect.TypeOf(value); to.Kind() == reflect.String {
 			value = fmt.Sprintf("'%v'", value)
 		}
 		insertStatement += fmt.Sprintf("%v, ", value)
 	}
-	insertStatement = insertStatement[:len(insertStatement) - 2] + ")"
+	insertStatement = insertStatement[:len(insertStatement)-2] + ")"
 	if _, err := db.Exec(insertStatement); err != nil {
 		return err
 	}
@@ -330,20 +361,24 @@ func Insert(database, table string, data interface{}) error {
 // This function inserts multiple
 // records to the given table and
 // database name.
-func InsertMany(database, table string, data interface{}) error {
-	if data == nil {
-		return errors.New("can not insert nil data")
-	}
-	b, err := json.Marshal(data)
+// Parameter 'data' can either be a struct
+// with json tags or a map[string]interface{}
+// but MUST be not nil.
+// In case parameter 'data' is a struct with
+// json tags, the order of the fields MUST
+// be the same order of fields in the
+// destination table.
+func InsertMany(table string, data interface{}) error {
+	insertMap, err := BuildListMap(data)
 	if err != nil {
+		if err.Error() == NilParamErr {
+			return errors.New("can not insert nil data")
+		}
 		return err
 	}
-	var m []map[string]interface{}
-	if err := json.Unmarshal(b, &m); err != nil {
-		return err
-	}
-	insertStatement := fmt.Sprintf("USE %v; INSERT INTO %v VALUES", database, table)
-	for _, info := range m {
+	defer utils.MapDestructor(insertMap)
+	insertStatement := fmt.Sprintf("INSERT INTO %v VALUES", table)
+	for _, info := range insertMap {
 		insertStatement += "("
 		for _, value := range info {
 			if to := reflect.TypeOf(value); to.Kind() == reflect.String {
@@ -351,11 +386,56 @@ func InsertMany(database, table string, data interface{}) error {
 			}
 			insertStatement += fmt.Sprintf("%v, ", value)
 		}
-		insertStatement = insertStatement[:len(insertStatement) - 2] + "),"
+		insertStatement = insertStatement[:len(insertStatement)-2] + "),"
 	}
 	insertStatement = insertStatement[:len(insertStatement)-1]
 	if _, err := db.Exec(insertStatement); err != nil {
 		return err
 	}
 	return nil
+}
+
+// This function returns a map[string]interface{}
+// built from parameter 'parameter'.
+func BuildMap(parameter interface{}) (map[string]interface{}, error) {
+	if parameter == nil {
+		return nil, errors.New(NilParamErr)
+	}
+	var parameterMap map[string]interface{}
+	switch m, ok := parameter.(map[string]interface{}); {
+	case ok:
+		return m, nil
+	default:
+		b, err := json.Marshal(parameter)
+		if err != nil {
+			return nil, err
+		}
+		if err := json.Unmarshal(b, &parameterMap); err != nil {
+			return nil, err
+		}
+		return parameterMap, nil
+	}
+}
+
+// This function returns a list of
+// map[string]interface{} built from
+// parameter 'parameter.
+func BuildListMap(parameter interface{}) ([]map[string]interface{}, error) {
+	if parameter == nil {
+		return nil, errors.New(NilParamErr)
+	}
+	var parameterListMap []map[string]interface{}
+	switch lm, ok := parameter.([]map[string]interface{}); {
+	case ok:
+		return lm, nil
+	default:
+		b, err := json.Marshal(parameter)
+		if err != nil {
+			return nil, err
+		}
+		if err := json.Unmarshal(b, &parameterListMap); err != nil {
+			return nil, err
+		}
+		return parameterListMap, nil
+	}
 }

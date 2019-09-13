@@ -74,12 +74,15 @@ func NewLogMiddleware(next http.Handler) http.Handler {
 		switch {
 		case isJson:
 			_ = json.Unmarshal(loggingRW.body, &res)
+			logFields["ResponseBody"] = res
 		case isXml:
 			_ = xml.Unmarshal(loggingRW.body, &res)
+			logFields["ResponseBody"] = res
+		default:
+			logFields["UnsupportedContentType"] = ct
 		}
-		logFields["ResponseBody"] = res
 		logFields["Status"] = loggingRW.status
-		logFields["ProcessTime"] = fmt.Sprintf("%v", time.Since(start))
+		logFields["ProcessTime"] = time.Since(start).String()
 		entry := logrus.WithFields(logFields)
 		entry.Logger.SetFormatter(&logrus.JSONFormatter{})
 		entry.Println()
