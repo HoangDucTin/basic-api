@@ -8,6 +8,16 @@ import (
 	"github.com/globalsign/mgo"
 )
 
+// Configs contains the configuration
+// for opening connection to MongoDB.
+type Configs struct {
+	Addresses string
+	Database  string
+	Username  string
+	Password  string
+	Timeout   time.Duration
+}
+
 var (
 	session *mgo.Session
 	// ErrInitialized is returned when
@@ -23,13 +33,13 @@ var (
 // for connecting is given.
 // (Notice: You should not set the
 // timeout duration too long.)
-func NewMongoClient(addresses, database, username, password string, timeout time.Duration) error {
+func NewMongoClient(cfg Configs) error {
 	dialInfo := mgo.DialInfo{
-		Addrs:    strings.Split(addresses, ","),
-		Database: database,
-		Username: username,
-		Password: password,
-		Timeout:  timeout,
+		Addrs:    strings.Split(cfg.Addresses, ","),
+		Database: cfg.Database,
+		Username: cfg.Username,
+		Password: cfg.Password,
+		Timeout:  cfg.Timeout,
 	}
 
 	switch s, err := mgo.DialWithInfo(&dialInfo); {

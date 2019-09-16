@@ -38,10 +38,6 @@ func NewLogMiddleware(next http.Handler) http.Handler {
 		if reqID := middleware.GetReqID(r.Context()); reqID != "" {
 			logFields["RequestID"] = reqID
 		}
-		scheme := "http"
-		if r.TLS != nil {
-			scheme = "https"
-		}
 		logFields["HttpMethod"] = r.Method
 		logFields["RemoteAddr"] = r.RemoteAddr
 		logFields["UserAgent"] = r.UserAgent()
@@ -66,7 +62,7 @@ func NewLogMiddleware(next http.Handler) http.Handler {
 			_ = xml.NewDecoder(rdr1).Decode(&req)
 			logFields["RequestBody"] = req
 		}
-		logFields["URI"] = fmt.Sprintf("%s://%s%s", scheme, r.Host, r.RequestURI)
+		logFields["URI"] = fmt.Sprintf("%s://%s%s", r.URL.Scheme, r.Host, r.RequestURI)
 		loggingRW := &loggingResponseWriter{
 			ResponseWriter: w,
 		}

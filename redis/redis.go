@@ -10,15 +10,23 @@ var (
 	redisClient redis.UniversalClient
 )
 
+// Configs contains the configuration
+// for opening connection to Redis server.
+type Configs struct {
+	Addresses []string
+	Master    string
+	Password  string
+}
+
 // NewRedisClient creates an instance
 // of redis-client, which allow you
 // to get data from redis, also set
 // new data to it.
-func NewRedisClient(master, password string, addrs []string) {
+func NewRedisClient(cfg Configs) {
 	redisClient = redis.NewUniversalClient(&redis.UniversalOptions{
-		MasterName: master,
-		Addrs:      addrs,
-		Password:   password,
+		MasterName: cfg.Master,
+		Addrs:      cfg.Addresses,
+		Password:   cfg.Password,
 	})
 }
 
