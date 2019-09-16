@@ -1,9 +1,9 @@
 # Basic-api
-Basic-api is a simple framework for beginners knowing how to build a simple Restful API system.
-It also provides the ways to interact with MongoDB, SQL server and Redis.
+Basic-api is a simple framework for helping beginners to know how to build a simple Restful API system.
+It also provides the ways to interact with MongoDB, SQL server and Redis server.
 Beside that, it gives users the way to build http client for communicating with other servers, or systems.
 ## Download
-This is a library writen in Go languge, so for download it, you can you go get command.
+This is a library writen in Go languge, so for downloading it, you can use go get command.
 ```bash
 go get "github.com/tinwoan-go/basic-api"
 ```
@@ -11,7 +11,7 @@ go get "github.com/tinwoan-go/basic-api"
 This section will provide you some simple ways and steps for using this library.
 ### Sample routing
 This library provides a simple routing method based on go-chi library.
-This sample routing provides users 2 self-built middlewares for set the request header with no-cache, and log out screen every request and response came to the server.
+This sample routing provides users 2 self-built middlewares for setting the request headers with no-cache, and log out screen every requests and responses came to the server in JSON format.
 You can initiate the routers as follow.
 ```go
 package main
@@ -25,7 +25,7 @@ func main() {
 }
 ```
 ### Serve HTTP
-This library provides a way to serve HTTP a lot easier than normal.
+This library provides a way to serve HTTP in a lots-easier-way than normal.
 You don't need to create a server yourself and you don't need to handle graceful shutdown on your own.
 You can just do it as follow.
 
@@ -34,9 +34,10 @@ You can just do it as follow.
 package main
 
 import (
+	"time"
+	
 	"github.com/tinwoan-go/basic-api/handler"
 	"github.com/tinwoan-go/basic-api/server"
-	"time"
 )
 
 func main() {
@@ -62,7 +63,7 @@ func main() {
 ```
 This will print out the terminal
 ```bash
-You did it!
+INFO You did it!
 ```
 ### Http client
 This library provides a package for sending the request from your application to other systems or services in http requests.
@@ -73,13 +74,14 @@ For initiating the http client of your application, you can do as below.
 package main
 
 import (
-	"github.com/tinwoan-go/basic-api/http"
 	"time"
+	
+	"github.com/tinwoan-go/basic-api/http"
 )
 
 func main() {
-	// For this example I don't have proxy URL so I'll leave as ""
-	// And timeout for this client to send request will be 10 seconds.
+	// For this example I don't have proxy URL so I'll leave as "",
+	// and timeout for this client to send request will be 10 seconds.
 	proxyURL := ""
 	if err := http.NewHTTPClient(proxyURL, 10 * time.Second); err != nil {
 		panic(err)
@@ -88,14 +90,15 @@ func main() {
 ```
 ### Mongo
 This library provides a package for wrapping basic methods for interacting with MongoDB named mongo.
-This package uses "github.com/globalsign/mgo" library to interact with MongoDB itself.
+This package uses "github.com/globalsign/mgo" library for interacting with MongoDB itself.
 First thing first, you need to initiate the connection to MongoDB for your application.
 ```go
 package main
 
 import (
-	"github.com/tinwoan-go/basic-api/mongo"
 	"time"
+	
+	"github.com/tinwoan-go/basic-api/mongo"
 )
 
 func main() {
@@ -141,7 +144,7 @@ func main() {
 	}()
 }
 ```
-This package provides 2 simple method to get data from Redis server (Get) and set a value to redis server with a specified key (Set).
+This package provides 2 simple methods for getting data from Redis server (Get) and setting a value to redis server with a specified key (Set).
 ### SQL
 This library provides a package named "sql" for connecting and interacting with SQL server.
 (Caution: Because this package is built on the purpose of making things generic, I've use the json format in some cases and I'm trying to implement it to a better phase.)
@@ -172,19 +175,3 @@ func main() {
 	}()
 }
 ```
-This package provides methods to find one (Find), find all (FindAll), find with a limit (FindWithLimit), insert one (Insert), insert many (InsertMany), delete (Delete), update (Update).
-
-Caution:
-	To use this package, your structs must have json tag.
-	Example:
-```go
-type Test struct {
-	Message string `json:"message"`
-}
-```
-	And the json tags should have the same names with the name of the columns in your SQL database.
-	And the fields in the structs should have the same order with the order of the columns in your SQL database.
-	
-	Most of the functions can use parameters either in structs or in map[string]interface{}.
-	(For now the generic implementation for SQL server has not been introduced yet, so I've used the json tag for this purpose.
-	Sorry for the inconvinience and I'll improve it in the future.)
