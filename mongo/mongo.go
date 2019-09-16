@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"errors"
+	"reflect"
 	"strings"
 	"time"
 
@@ -24,6 +25,7 @@ var (
 	// cannot clone from the current
 	// MongoDB session.
 	ErrInitialized = errors.New("MongoDB connection has not been initialized")
+	ErrNotSlice    = errors.New("the list is not a slice")
 )
 
 // NewMongoClient creates an instance
@@ -113,7 +115,18 @@ func Insert(database, collection string, data interface{}) error {
 // given by the list into the collection
 // within the database, which are given
 // names.
-func InsertAll(database, collection string, list []interface{}) error {
+func InsertAll(database, collection string, list interface{}) error {
+	slice := reflect.ValueOf(list)
+	if slice.Kind() != reflect.Slice {
+		return ErrNotSlice
+	}
+
+	ret := make([]interface{}, slice.Len())
+
+	for i:=0; i<slice.Len(); i++ {
+		ret[i] = slice.Index(i).Interface()
+	}
+
 	s := cloneSession()
 	if s == nil {
 		return ErrInitialized
@@ -121,7 +134,7 @@ func InsertAll(database, collection string, list []interface{}) error {
 	defer s.Close()
 
 	bulk := s.DB(database).C(collection).Bulk()
-	for _, item := range list {
+	for _, item := range ret {
 		bulk.Insert(item)
 	}
 
@@ -200,6 +213,36 @@ func Change(database, collection string, selector, new, result interface{}) erro
 
 	change := mgo.Change{Update: new, ReturnNew: true}
 	_, err := s.DB(database).C(collection).Find(selector).Apply(change, result)
+	return err
+}
+
+// Delete finds a single
+// document (first one)
+// matching the provided
+// selector document and
+// removes it from the
+// database.
+func Delete(database, collection string, selector interface{}) error {
+	s := cloneSession()
+	if s == nil {
+		return ErrInitialized
+	}
+	defer s.Close()
+
+	return s.DB(database).C(collection).Remove(selector)
+}
+
+// DeleteAll finds all documents
+// matching the provided selector
+// document and removes them
+// from the database.
+func DeleteAll(database, collection string, selector interface{}) error {
+	s := cloneSession()
+	if s == nil {
+		return ErrInitialized
+	}
+	defer s.Close()
+	_, err := s.DB(database).C(collection).RemoveAll(selector)
 	return err
 }
 
