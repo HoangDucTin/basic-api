@@ -7,8 +7,8 @@ import (
 )
 
 // MapDestructor releases elements
-// in "target" in case it's a map
-// or a list of maps.
+// in 'target' in case it is either
+// a map or a list of maps.
 func MapDestructor(target interface{}) {
 	if m, ok := target.(map[string]interface{}); ok {
 		singleMap(m)

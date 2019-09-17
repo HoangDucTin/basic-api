@@ -14,10 +14,10 @@ import (
 )
 
 var (
-	client                    *http.Client
-	contentType               = "Content-Type"
-	jsonContentType           = "application/json"
-	xmlContentType            = "text/xml;charset=UTF-8"
+	client          *http.Client
+	contentType     = "Content-Type"
+	jsonContentType = "application/json"
+	xmlContentType  = "text/xml;charset=UTF-8"
 	// ErrUnsupportedContentType points out the
 	// unsupported Content-Type of the request.
 	ErrUnsupportedContentType = errors.New("unsupported Content-Type")
@@ -49,9 +49,9 @@ func NewHTTPClient(proxyURL string, timeout time.Duration) error {
 	return nil
 }
 
-// Close will disconnect
-// the HTTP instance and close
-// the connection.
+// Close disconnects the
+// HTTP instance and
+// closes the connection.
 func Close() {
 	client.Transport = nil
 	client.CloseIdleConnections()
@@ -101,7 +101,7 @@ func GetXML(url, username, password string, response interface{}) error {
 	return get(url, xmlContentType, username, password, response)
 }
 
-// This function creates a post request
+// post creates a post request
 // base on the Content-Type and
 // uses 'client' to do the request
 // and bases on the Content-Type
@@ -152,7 +152,7 @@ func post(url, ct, user, pass string, request, response interface{}) error {
 	}
 }
 
-// This function creates a get request
+// get creates a get request
 // base on the Content-Type and
 // uses 'client' to do the request
 // and bases on the Content-Type

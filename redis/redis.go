@@ -39,8 +39,8 @@ func Get(key string) (string, error) {
 // Set sets the value
 // into redis-server based on
 // the key.
-func Set(key string, value interface{}, expiration time.Duration) {
-	redisClient.Set(key, value, expiration)
+func Set(key string, value interface{}, expiration time.Duration) (string, error) {
+	return redisClient.Set(key, value, expiration).Result()
 }
 
 // Close closes the connection
