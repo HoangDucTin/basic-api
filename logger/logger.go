@@ -7,37 +7,73 @@ import (
 // Fail prints out the message
 // with prefix 'FAIL'.
 func Fail(format string, args ...interface{}) {
-	fmt.Println("FAIL", fmt.Sprintf(format, args...))
+	message := "[FAIL]: "
+	if args != nil {
+		message += fmt.Sprintf(format, args)
+	} else {
+		message += format
+	}
+	fmt.Println(message)
 }
 
 // Help prints out the message
 // with prefix 'HELP'.
 func Help(format string, args ...interface{}) {
-	fmt.Println("HELP", fmt.Sprintf(format, args...))
+	message := "[HELP]: "
+	if args != nil {
+		message += fmt.Sprintf(format, args)
+	} else {
+		message += format
+	}
+	fmt.Println(message)
 }
 
 // Info prints out the message
 // with prefix 'INFO'.
 func Info(format string, args ...interface{}) {
-	fmt.Println("INFO", fmt.Sprintf(format, args))
+	message := "[INFO]: "
+	if args != nil {
+		message += fmt.Sprintf(format, args)
+	} else {
+		message += format
+	}
+	fmt.Println(message)
 }
 
 // Warn prints out the message
 // with prefix 'WARN'.
 func Warn(format string, args ...interface{}) {
-	fmt.Println("WARN", fmt.Sprintf(format, args))
+	message := "[WARN]: "
+	if args != nil {
+		message += fmt.Sprintf(format, args)
+	} else {
+		message += format
+	}
+	fmt.Println(message)
 }
 
 // Exit prints out the message
 // with prefix 'EXIT'.
 func Exit(format string, args ...interface{}) {
-	fmt.Println("EXIT", fmt.Sprintf(format, args))
+	message := "[EXIT]: "
+	if args != nil {
+		message += fmt.Sprintf(format, args)
+	} else {
+		message += format
+	}
+	fmt.Println(message)
 }
 
 // Error prints out the message
 // with prefix 'ERROR'.
 func Error(format string, args ...interface{}) {
-	fmt.Println("ERROR", fmt.Sprintf(format, args))
+	message := "[ERROR]: "
+	if args != nil {
+		message += fmt.Sprintf(format, args)
+	} else {
+		message += format
+	}
+	fmt.Println(message)
 }
 
 // End-of-file

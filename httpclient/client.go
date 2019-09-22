@@ -1,7 +1,8 @@
-package http
+package httpclient
 
 import (
 	"bytes"
+	"context"
 	"crypto/tls"
 	"encoding/json"
 	"encoding/xml"
@@ -10,7 +11,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/tinwoan-go/basic-api/logger"
+	"github.com/tinwoan-go/basic-api/tlog"
 )
 
 var (
@@ -21,7 +22,37 @@ var (
 	// ErrUnsupportedContentType points out the
 	// unsupported Content-Type of the request.
 	ErrUnsupportedContentType = errors.New("unsupported Content-Type")
+	log                       tlog.Logger
 )
+
+type (
+	// PostInfo contains the
+	// information for doing
+	// a POST request.
+	PostInfo struct {
+		Ctx      context.Context
+		URL      string
+		Username string
+		Password string
+		Request  interface{}
+		Response interface{}
+	}
+
+	// GetInfo contains the
+	// information for doing
+	// a GET request.
+	GetInfo struct {
+		Ctx      context.Context
+		URL      string
+		Username string
+		Password string
+		Response interface{}
+	}
+)
+
+func init() {
+	log = tlog.WithPrefix("client")
+}
 
 // NewHTTPClient will create an
 // instance of HTTP client base
@@ -64,8 +95,8 @@ func Close() {
 // If username or password is empty,
 // this function will send a simple
 // request with no authentication.
-func PostJSON(url, username, password string, request, response interface{}) error {
-	return post(url, jsonContentType, username, password, request, response)
+func PostJSON(postInfo *PostInfo) error {
+	return post(postInfo, jsonContentType)
 }
 
 // GetJSON sends a get request
@@ -75,8 +106,8 @@ func PostJSON(url, username, password string, request, response interface{}) err
 // If username or password is empty,
 // this function will send a simple
 // request with no authentication.
-func GetJSON(url, username, password string, response interface{}) error {
-	return get(url, jsonContentType, username, password, response)
+func GetJSON(getInfo *GetInfo) error {
+	return get(getInfo, jsonContentType)
 }
 
 // PostXML sends a post request
@@ -86,8 +117,8 @@ func GetJSON(url, username, password string, response interface{}) error {
 // If username or password is empty,
 // this function will send a simple
 // request with no authentication.
-func PostXML(url, username, password string, request, response interface{}) error {
-	return post(url, xmlContentType, username, password, request, response)
+func PostXML(postInfo *PostInfo) error {
+	return post(postInfo, xmlContentType)
 }
 
 // GetXML sends a get request
@@ -97,8 +128,8 @@ func PostXML(url, username, password string, request, response interface{}) erro
 // If username or password is empty,
 // this function will send a simple
 // request with no authentication.
-func GetXML(url, username, password string, response interface{}) error {
-	return get(url, xmlContentType, username, password, response)
+func GetXML(getInfo *GetInfo) error {
+	return get(getInfo, xmlContentType)
 }
 
 // post creates a post request
@@ -106,31 +137,31 @@ func GetXML(url, username, password string, response interface{}) error {
 // uses 'client' to do the request
 // and bases on the Content-Type
 // to parse result in to the response.
-func post(url, ct, user, pass string, request, response interface{}) error {
+func post(postInfo *PostInfo, ct string) error {
 	var (
 		b   []byte
 		err error
 	)
 	switch ct {
 	case jsonContentType:
-		b, err = json.Marshal(request)
+		b, err = json.Marshal(postInfo.Request)
 		if err != nil {
 			return err
 		}
 	case xmlContentType:
-		b, err = xml.Marshal(request)
+		b, err = xml.Marshal(postInfo.Request)
 		if err != nil {
 			return err
 		}
 	default:
 		return ErrUnsupportedContentType
 	}
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(b))
+	req, err := http.NewRequest(http.MethodPost, postInfo.URL, bytes.NewBuffer(b))
 	if err != nil {
 		return err
 	}
 	req.Header.Set(contentType, ct)
-	if user != "" && pass != "" {
+	if user, pass := postInfo.Username, postInfo.Password; user != "" && pass != "" {
 		req.SetBasicAuth(user, pass)
 	}
 	res, err := client.Do(req)
@@ -139,14 +170,14 @@ func post(url, ct, user, pass string, request, response interface{}) error {
 	}
 	defer func() {
 		if err := res.Body.Close(); err != nil {
-			logger.Error("Error when close response body, error: %v", err)
+			log.TErrorf(postInfo.Ctx, "Error when close response body, error: %v", err)
 		}
 	}()
 	switch ct {
 	case jsonContentType:
-		return json.NewDecoder(res.Body).Decode(&response)
+		return json.NewDecoder(res.Body).Decode(&postInfo.Response)
 	case xmlContentType:
-		return xml.NewDecoder(res.Body).Decode(&response)
+		return xml.NewDecoder(res.Body).Decode(&postInfo.Response)
 	default:
 		return ErrUnsupportedContentType
 	}
@@ -157,13 +188,13 @@ func post(url, ct, user, pass string, request, response interface{}) error {
 // uses 'client' to do the request
 // and bases on the Content-Type
 // to parse result in to the response.
-func get(url, ct, user, pass string, response interface{}) error {
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+func get(getInfo *GetInfo, ct string) error {
+	req, err := http.NewRequest(http.MethodGet, getInfo.URL, nil)
 	if err != nil {
 		return err
 	}
 	req.Header.Set(contentType, ct)
-	if user != "" && pass != "" {
+	if user, pass := getInfo.Username, getInfo.Password; user != "" && pass != "" {
 		req.SetBasicAuth(user, pass)
 	}
 	res, err := client.Do(req)
@@ -172,14 +203,14 @@ func get(url, ct, user, pass string, response interface{}) error {
 	}
 	defer func() {
 		if err := res.Body.Close(); err != nil {
-			logger.Error("Error when close response body, error: %v", err)
+			log.TErrorf(getInfo.Ctx, "Error when close response body, error: %v", err)
 		}
 	}()
 	switch ct {
 	case jsonContentType:
-		return json.NewDecoder(res.Body).Decode(&response)
+		return json.NewDecoder(res.Body).Decode(&getInfo.Response)
 	case xmlContentType:
-		return xml.NewDecoder(res.Body).Decode(&response)
+		return xml.NewDecoder(res.Body).Decode(&getInfo.Response)
 	default:
 		return ErrUnsupportedContentType
 	}
