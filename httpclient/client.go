@@ -1,6 +1,7 @@
 package httpclient
 
 import (
+	// Native packages
 	"bytes"
 	"context"
 	"crypto/tls"
@@ -11,6 +12,7 @@ import (
 	"net/url"
 	"time"
 
+	// Internal packages
 	"github.com/tinwoan-go/basic-api/tlog"
 )
 

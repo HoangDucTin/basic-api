@@ -1,11 +1,14 @@
 package tlog
 
 import (
+	// Native packages
 	"context"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
 	"os"
+
+	// Third parties
+	"gopkg.in/yaml.v2"
 )
 
 // LoggerT is used for getting

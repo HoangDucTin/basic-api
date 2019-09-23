@@ -1,10 +1,20 @@
 package utils
 
 import (
+	// Native packages
 	"reflect"
 
-	"github.com/tinwoan-go/basic-api/logger"
+	// Internal packages
+	"github.com/tinwoan-go/basic-api/tlog"
 )
+
+var (
+	log tlog.Logger
+)
+
+func init() {
+	log = tlog.WithPrefix("utils")
+}
 
 // MapDestructor releases elements
 // in 'target' in case it is either
@@ -18,7 +28,7 @@ func MapDestructor(target interface{}) {
 		listMap(lm)
 		return
 	}
-	logger.Warn("%v is not a map or a list of map", reflect.TypeOf(target))
+	log.Warnf("%v is not a map or a list of map", reflect.TypeOf(target))
 }
 
 func singleMap(m map[string]interface{}) {

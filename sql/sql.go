@@ -1,8 +1,10 @@
 package sql
 
 import (
+	// Native packages
 	"fmt"
-	
+
+	// Third parties
 	"github.com/jmoiron/sqlx"
 )
 

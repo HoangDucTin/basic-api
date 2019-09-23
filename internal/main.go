@@ -1,17 +1,30 @@
 package main
 
 import (
+	// Native packages
+	"net/http"
+	"time"
+
+	// Third parties
 	_ "github.com/denisenkom/go-mssqldb"
 	"github.com/go-chi/render"
+
+	// Internal packages
 	"github.com/tinwoan-go/basic-api/handler"
-	"github.com/tinwoan-go/basic-api/logger"
 	"github.com/tinwoan-go/basic-api/mongo"
 	"github.com/tinwoan-go/basic-api/redis"
 	"github.com/tinwoan-go/basic-api/server"
 	"github.com/tinwoan-go/basic-api/sql"
-	"net/http"
-	"time"
+	"github.com/tinwoan-go/basic-api/tlog"
 )
+
+var (
+	log tlog.Logger
+)
+
+func init() {
+	log = tlog.WithPrefix("main")
+}
 
 func main() {
 	// Connect Mongo
@@ -41,7 +54,7 @@ func main() {
 	}
 	defer func() {
 		if err := sql.Close(); err != nil {
-			logger.Warn("Error close SQL connection: %v", err)
+			log.Warnf("Error close SQL connection: %v", err)
 		}
 	}()
 
@@ -52,9 +65,9 @@ func main() {
 		Password:  "",
 	}
 	redis.NewRedisClient(redisCfg)
-	defer func(){
+	defer func() {
 		if err := redis.Close(); err != nil {
-			logger.Warn("Error close Redis connection: %v", err)
+			log.Warnf("Error close Redis connection: %v", err)
 		}
 	}()
 

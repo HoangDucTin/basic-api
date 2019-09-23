@@ -1,11 +1,13 @@
 package mongo
 
 import (
+	// Native packages
 	"errors"
 	"reflect"
 	"strings"
 	"time"
 
+	// Third parties
 	"github.com/globalsign/mgo"
 )
 

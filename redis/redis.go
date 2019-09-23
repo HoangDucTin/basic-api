@@ -1,8 +1,10 @@
 package redis
 
 import (
+	// Native packages
 	"time"
 
+	// Third parties
 	"github.com/go-redis/redis"
 )
 

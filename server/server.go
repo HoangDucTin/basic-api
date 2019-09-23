@@ -1,6 +1,7 @@
 package server
 
 import (
+	// Native packages
 	"context"
 	"net/http"
 	"os"
@@ -8,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	// Third parties
 	"github.com/go-chi/chi"
 )
 

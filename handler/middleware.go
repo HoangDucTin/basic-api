@@ -1,6 +1,7 @@
 package handler
 
 import (
+	// Native packages
 	"bytes"
 	"encoding/json"
 	"encoding/xml"
@@ -10,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	// Third parties
 	"github.com/go-chi/chi/middleware"
 	"github.com/sirupsen/logrus"
 )

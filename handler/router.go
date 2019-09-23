@@ -1,10 +1,12 @@
 package handler
 
 import (
+	// Third parties
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/render"
 
+	// Internal packages
 	"github.com/tinwoan-go/basic-api/handler/check"
 )
 

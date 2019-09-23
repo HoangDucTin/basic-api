@@ -1,6 +1,7 @@
 package tlog
 
 import (
+	// Native packages
 	"io"
 	"sync"
 )
@@ -37,7 +38,7 @@ func Close() error {
 	}
 	for _, w := range openingWriters {
 		if w != nil {
-			w.Close()
+			_ = w.Close()
 		}
 	}
 

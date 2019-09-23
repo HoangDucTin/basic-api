@@ -1,8 +1,10 @@
 package check
 
 import (
+	// Native packages
 	"net/http"
 
+	// Third parties
 	"github.com/go-chi/render"
 )
 

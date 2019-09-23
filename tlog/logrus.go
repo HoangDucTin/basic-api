@@ -1,16 +1,19 @@
 package tlog
 
 import (
+	// Native packages
 	"context"
 	"fmt"
-	"github.com/go-chi/chi/middleware"
-	"github.com/sirupsen/logrus"
-	"gopkg.in/robfig/cron.v2"
 	"io"
 	"io/ioutil"
 	"os"
 	"strings"
 	"time"
+
+	// Third parties
+	"github.com/go-chi/chi/middleware"
+	"github.com/sirupsen/logrus"
+	"gopkg.in/robfig/cron.v2"
 )
 
 // logrusLogger is the wrapper of logrus logger to satisfy the TLog.Logger interface.
