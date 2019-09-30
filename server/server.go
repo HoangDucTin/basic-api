@@ -8,9 +8,6 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
-
-	// Third parties
-	"github.com/go-chi/chi"
 )
 
 func serveWithGracefulShutdown(server *http.Server, timeout time.Duration, proc func() error) error {
@@ -44,12 +41,7 @@ func serveWithGracefulShutdown(server *http.Server, timeout time.Duration, proc 
 
 // ServeHTTP serves the server
 // on HTTP protocol.
-func ServeHTTP(routers *chi.Mux, address string, timeout time.Duration) error {
-	server := &http.Server{
-		Handler: routers,
-		Addr:    address,
-	}
-
+func ServeHTTP(server *http.Server, timeout time.Duration) error {
 	return serveWithGracefulShutdown(server, timeout, func() error {
 		return server.ListenAndServe()
 	})
@@ -57,16 +49,30 @@ func ServeHTTP(routers *chi.Mux, address string, timeout time.Duration) error {
 
 // ServeHTTPS serves the server
 // on HTTPS protocol.
-func ServeHTTPS(routers *chi.Mux, publicKey, privateKey, address string, timeout time.Duration) error {
-
-	server := &http.Server{
-		Handler: routers,
-		Addr:    address,
-	}
-
+func ServeHTTPS(server *http.Server, publicKey, privateKey string, timeout time.Duration) error {
 	return serveWithGracefulShutdown(server, timeout, func() error {
 		return server.ListenAndServeTLS(publicKey, privateKey)
 	})
+}
+
+// Serve serves the server
+// on both HTTP and HTTPS
+// protocols.
+func Serve(server *http.Server, publicKey, privateKey string, timeout time.Duration) error {
+	trigger := make(chan error, 1)
+	go func() { trigger <- ServeHTTP(server, timeout) }()
+	go func() { trigger <- ServeHTTPS(server, privateKey, publicKey, timeout) }()
+
+	if errServing := <-trigger; errServing != nil {
+		srvCtx, srvCancel := context.WithTimeout(context.Background(), timeout)
+		defer srvCancel()
+
+		if err := server.Shutdown(srvCtx); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // End-of-file

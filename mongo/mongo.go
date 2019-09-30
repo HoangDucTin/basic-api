@@ -21,6 +21,14 @@ type Configs struct {
 	Timeout   time.Duration
 }
 
+// Collection contains the
+// name of a collection
+// and its indices.
+type Collection struct {
+	Name    string
+	Indices []mgo.Index
+}
+
 var (
 	// session holds the session
 	// of connection to MongoDB
@@ -67,7 +75,11 @@ var (
 // for connecting is given.
 // (Notice: You should not set the
 // timeout duration too long.)
-func NewMongoClient(cfg Configs) error {
+// The parameter 'collections' is
+// for indexing to make sure the
+// correctness and fasten of
+// retrieving data.
+func NewMongoClient(cfg Configs, collections []Collection) error {
 	dialInfo := mgo.DialInfo{
 		Addrs:    strings.Split(cfg.Addresses, ","),
 		Database: cfg.Database,
@@ -82,6 +94,10 @@ func NewMongoClient(cfg Configs) error {
 	default:
 		s.SetMode(mgo.Monotonic, true)
 		session = s
+		if err := EnsureIndices(collections); err != nil {
+			session = nil
+			return err
+		}
 		return nil
 	}
 }
@@ -101,6 +117,26 @@ func cloneSession() *mgo.Session {
 		return nil
 	}
 	return session.Copy()
+}
+
+// EnsureIndices ensures the indices
+// in the parameter 'collections'
+// to make sure the correctness and
+// fasten the retrieving data.
+func EnsureIndices(collections []Collection) error {
+	if collections != nil {
+		for _, collection := range collections {
+			for _, index := range collection.Indices {
+				if err := session.DB("").C(collection.Name).EnsureIndex(index); err != nil {
+					_ = session.DB("").C(collection.Name).DropIndexName(index.Name)
+					if err := session.DB("").C(collection.Name).EnsureIndex(index); err != nil {
+						return err
+					}
+				}
+			}
+		}
+	}
+	return nil
 }
 
 // Find queries from 'collection'

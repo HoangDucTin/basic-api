@@ -77,8 +77,6 @@ func NewLogMiddleware(next http.Handler) http.Handler {
 		case isXML:
 			_ = xml.Unmarshal(loggingRW.body, &res)
 			logFields["ResponseBody"] = res
-		default:
-			logFields["ErrUnsupportedContentType"] = ct
 		}
 		logFields["Status"] = loggingRW.status
 		logFields["ProcessTime"] = time.Since(start).String()
