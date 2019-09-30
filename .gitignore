@@ -20,6 +20,5 @@ basic-api
 # Ignore Makefile
 Makefile
 
-# Ignore binary file
-internal/internal
-internal/main.go
+# Ignore package internal
+internal/
